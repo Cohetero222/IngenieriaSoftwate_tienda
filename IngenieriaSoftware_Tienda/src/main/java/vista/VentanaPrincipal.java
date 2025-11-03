@@ -37,20 +37,20 @@ public class VentanaPrincipal extends JFrame {
         btnAgregar = new JButton("➕ Agregar");
         btnEditar = new JButton("✏️ Editar");
         btnEliminar = new JButton("❌ Eliminar");
-        btnReportes = new JButton("📊 Reportes");
+       
         btnRegistrarVenta = new JButton("💵 Registrar Venta");
         
 
         btnAgregar.addActionListener(e -> abrirFormularioProducto());
         btnEditar.addActionListener(e -> editarProducto());
         btnEliminar.addActionListener(e -> eliminarProducto());
-        btnReportes.addActionListener(e -> abrirReportes());
+        
         btnRegistrarVenta.addActionListener(e -> registrarVenta());
 
         panelBotones.add(btnAgregar);
         panelBotones.add(btnEditar);
         panelBotones.add(btnEliminar);
-        panelBotones.add(btnReportes);
+        
         panelBotones.add(btnRegistrarVenta);
         add(panelBotones, BorderLayout.SOUTH);
 
@@ -107,3 +107,4 @@ public class VentanaPrincipal extends JFrame {
         }
     }
 }
+
