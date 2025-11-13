@@ -127,6 +127,10 @@ public class VentanaPrincipal extends JFrame {
         try {
             List<Producto> productos = new ProductoDAO().listarTodos();
             tablaProductos.setModel(new ProductoTableModel(productos));
+            //Reaplicar renderer y repintar cada vez que cambie un modelo
+            tablaProductos.setDefaultRenderer(Object.class, new ProductoCellRenderer());
+            tablaProductos.revalidate();
+            tablaProductos.repaint();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Error al cargar productos: " + ex.getMessage(), "Error",
                     JOptionPane.ERROR_MESSAGE);
@@ -152,7 +156,7 @@ public class VentanaPrincipal extends JFrame {
             // Actualizar la tabla con los resultados (o la lista completa)
             tablaProductos.setModel(new ProductoTableModel(productos));
 
-        } catch (SQLException ex) {
+        } catch (SQLException ex) {     
             JOptionPane.showMessageDialog(this, "Error de búsqueda en la BD: " + ex.getMessage(), "Error",
                     JOptionPane.ERROR_MESSAGE);
         }
