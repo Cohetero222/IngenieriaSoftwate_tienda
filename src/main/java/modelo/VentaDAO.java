@@ -1,9 +1,18 @@
 package modelo;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VentaDAO {
+    /* Obtener ventas por fecha */
+    private static final String SelectVentasPorFechaSQL = "SELECT v.id, v.cantidad, v.precio_unitario, v.fecha, "
+            + "p.id AS id_producto, p.nombre, p.categoria " +
+            "FROM ventas v " + "JOIN productos p ON v.id_producto = p.id "
+            + "WHERE datetime(v.fecha) BETWEEN datetime(?) AND datetime(?);";
+
     private static final String INSERT_VENTA_SQL = "INSERT INTO ventas (id_producto, cantidad, precio_unitario, fecha) VALUES (?, ?, ?, ?)";
     private static final String UPDATE_STOCK_SQL = "UPDATE productos SET cantidad = cantidad - ?, ventas = ventas + ? WHERE id = ?";
 
@@ -53,5 +62,48 @@ public class VentaDAO {
                 conn.close();
             }
         }
+    }
+
+    /* Metodo para filtrar las ventas (mes pasado) */
+    public static List<Venta> obtenerVentasPorFecha(Date fechaInicio, Date fechaFin) throws SQLException {
+        List<Venta> ventas = new ArrayList<>();
+
+        try (Connection conn = ConexionSQLite.conectar();
+                PreparedStatement pstmt = conn.prepareStatement(SelectVentasPorFechaSQL)) {
+
+            String inicioStr = fechaInicio.toString() + " 00:00:00";
+            String finStr = fechaFin.toString() + " 23:59:59";
+
+            pstmt.setString(1, inicioStr);
+            pstmt.setString(2, finStr);
+
+            /* Recorremos las consultas */
+            try (ResultSet rs = pstmt.executeQuery()) {
+                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                while (rs.next()) {
+                    /* Creamos los productos y ventas de la lista filtrada */
+                    Producto producto = new Producto();
+                    producto.setId(rs.getInt("id_producto"));
+                    producto.setNombre(rs.getString("nombre"));
+                    producto.setCategoria(rs.getString("categoria"));
+
+                    Venta venta = new Venta();
+                    venta.setId(rs.getInt("id"));
+                    venta.setProducto(producto);
+                    venta.setCantidad(rs.getInt("cantidad"));
+                    venta.setPrecioUnitario(rs.getDouble("precio_unitario"));
+
+                    // Leer la fecha como String y convertir a LocalDateTime
+                    String fechaStr = rs.getString("fecha");
+                    if (fechaStr != null && !fechaStr.isBlank()) {
+                        venta.setFecha(LocalDateTime.parse(fechaStr, fmt));
+                    }
+
+                    ventas.add(venta);
+                }
+            }
+        }
+
+        return ventas;
     }
 }

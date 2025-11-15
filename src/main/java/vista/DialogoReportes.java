@@ -8,10 +8,19 @@ import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Comparator; // Necesario para ordenar si se desea
+import java.util.HashMap;
+import java.time.LocalDate; //Para el calculo de fechas
+import java.time.format.TextStyle;
+import java.sql.Date; //Para conversion a SQL Date
+import java.util.Locale;
+import java.util.Map;
+
+import modelo.Venta;
+import modelo.VentaDAO;
 
 public class DialogoReportes extends JDialog {
-
     public DialogoReportes(JFrame parent) {
+
         // Llama al constructor de JDialog: padre, título, modal (true)
         super(parent, "Reportes", true);
         setSize(800, 600);
@@ -83,9 +92,14 @@ public class DialogoReportes extends JDialog {
         // 2️⃣ Pestaña: Estado de productos (gráfico de pastel) - Lógica ya era
         // funcional
         JPanel panelEstados = new JPanel() {
+
             @Override
+
             protected void paintComponent(Graphics g) {
+
                 super.paintComponent(g);
+
+                /* Lógica del gráfico de pastel */
                 try {
                     ProductoDAO dao = new ProductoDAO();
                     List<Producto> productos = dao.listarTodos();
@@ -132,6 +146,152 @@ public class DialogoReportes extends JDialog {
 
         pestanas.addTab("Estados", panelEstados);
 
+
+        /* Panel de tablas */
+        JPanel PanelTablas = new JPanel();
+        PanelTablas.setLayout(new BoxLayout(PanelTablas, BoxLayout.Y_AXIS));
+        PanelTablas.setBackground(Color.WHITE);
+
+        /* Tabla de los productos mas vendidos */
+        JPanel SeccionMasVendidos = new JPanel(new BorderLayout());
+        SeccionMasVendidos.setBorder(BorderFactory.createTitledBorder("Productos mas Vendidos"));
+        SeccionMasVendidos.setBackground(Color.WHITE);
+        String[] columnas1 = { "Nombre", "Cantidad Vendida" };
+        Object[][] filas1 = new Object[5][2];
+        JTable tablaMasVendidos = new JTable(filas1, columnas1);
+        /* Diseño */
+        tablaMasVendidos.setRowHeight(25);
+        tablaMasVendidos.setFont(new Font("Arial", Font.PLAIN, 14));
+        tablaMasVendidos.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        SeccionMasVendidos.add(new JScrollPane(tablaMasVendidos), BorderLayout.CENTER);
+
+        /* Tabla de los productos con mayor ganancia */
+        JPanel SeccionMayorGanancia = new JPanel(new BorderLayout());
+        SeccionMayorGanancia.setBorder(BorderFactory.createTitledBorder("Productos con Mayor Ganancia"));
+        SeccionMayorGanancia.setBackground(Color.WHITE);
+        String[] columnas2 = { "Nombre", "Ganancia" };
+        Object[][] filas2 = new Object[5][2];
+        /* Diseño */
+        JTable tablaMayorGanancia = new JTable(filas2, columnas2);
+        tablaMayorGanancia.setRowHeight(25);
+        tablaMayorGanancia.setFont(new Font("Arial", Font.PLAIN, 14));
+        tablaMayorGanancia.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        SeccionMayorGanancia.add(new JScrollPane(tablaMayorGanancia), BorderLayout.CENTER);
+
+        /* Tabla de los productos menos vendidos */
+        JPanel SeccionMenosVendidos = new JPanel(new BorderLayout());
+        SeccionMenosVendidos.setBorder(BorderFactory.createTitledBorder("Productos menos Vendidos"));
+        SeccionMenosVendidos.setBackground(Color.WHITE);
+        String[] columnas3 = { "Nombre", "Cantidad Vendida" };
+        Object[][] filas3 = new Object[5][2];
+        JTable tablaMenosVendidos = new JTable(filas3, columnas3);
+        /* Diseño */
+        tablaMenosVendidos.setRowHeight(25);
+        tablaMenosVendidos.setFont(new Font("Arial", Font.PLAIN, 14));
+        tablaMenosVendidos.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        SeccionMenosVendidos.add(new JScrollPane(tablaMenosVendidos), BorderLayout.CENTER);
+
+        /* Añadir las secciones */
+        PanelTablas.add(SeccionMasVendidos);
+        PanelTablas.add(Box.createVerticalStrut(20));
+        PanelTablas.add(SeccionMayorGanancia);
+        PanelTablas.add(Box.createVerticalStrut(20));
+        PanelTablas.add(SeccionMenosVendidos);
+        
+        /*Llenado de las tablas*/
+        try {
+
+            /*Calculo para el mes pasado */
+         
+            LocalDate InicioMesPasado = LocalDate.now().minusMonths(1).withDayOfMonth(1);
+            LocalDate FinMesPasado = InicioMesPasado.withDayOfMonth(InicioMesPasado.lengthOfMonth());
+
+            Date FechaInicioSQL = Date.valueOf(InicioMesPasado);
+            Date FechaFinSQL = Date.valueOf(FinMesPasado);
+
+            String Mes = InicioMesPasado.getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "ES"));
+            JLabel EtiquetaMes = new JLabel("Reporte de: " + Mes);
+            EtiquetaMes.setFont(new Font("Arial", Font.BOLD, 16));
+            PanelTablas.add(EtiquetaMes, 0);
+
+            //VentaDAO vdao = new VentaDAO();
+            List<Venta> ventasMes = VentaDAO.obtenerVentasPorFecha(FechaInicioSQL, FechaFinSQL);
+
+            /*Si no hay ventas: */
+            if(ventasMes.isEmpty())
+             JOptionPane.showMessageDialog(this, "No hay ventas en el mes pasado.");
+            
+             /*Agrupacion por id */
+
+             Map<Integer, Integer> CantVendidas = new HashMap<>();
+             Map<Integer, Double> GananciasProducto = new HashMap<>();
+             Map<Integer, Producto> ProductosPorID = new HashMap<>();
+
+            for(Venta v : ventasMes){
+                int id = v.getProducto().getId();
+                ProductosPorID.put(id, v.getProducto());
+
+                /*Cantidad vendida */
+                CantVendidas.put(id, CantVendidas.getOrDefault(id, 0) + v.getCantidad());
+
+                /*Calcular ganancia */
+                double Ganancia = v.getCantidad() * v.getPrecioUnitario();
+                GananciasProducto.put(id, GananciasProducto.getOrDefault(id, 0.0) + Ganancia);
+            }
+
+            /*Creacion de listas */
+
+            List<Integer> MasVendidos = CantVendidas.keySet().stream()
+                    .sorted((id1, id2) -> Integer.compare(CantVendidas.get(id2), CantVendidas.get(id1)))
+                    .limit(5)
+                    .toList();
+
+            List<Integer> MenosVendidos =  CantVendidas.keySet().stream()
+                    .sorted(Comparator.comparingInt(CantVendidas::get))
+                    .limit(5)
+                    .toList();
+
+            List<Integer> MayorGanancia = GananciasProducto.keySet().stream()
+                    .sorted((id1, id2) -> Double.compare(GananciasProducto.get(id2), GananciasProducto.get(id1)))
+                    .limit(5)
+                    .toList();
+            
+            /* Llenar tabla de más vendidos*/
+            for (int i = 0; i < MasVendidos.size(); i++) {
+                int id = MasVendidos.get(i);
+                Producto p = ProductosPorID.get(id);
+                tablaMasVendidos.setValueAt(p.getNombre(), i, 0);
+                tablaMasVendidos.setValueAt(CantVendidas.get(id), i, 1);
+            }
+
+            /*Llenar tablas de menos vendidos */
+            for (int i = 0; i < MenosVendidos.size(); i++) {
+                int id = MenosVendidos.get(i);
+                Producto p = ProductosPorID.get(id);
+                tablaMenosVendidos.setValueAt(p.getNombre(), i, 0);
+                tablaMenosVendidos.setValueAt(CantVendidas.get(id), i, 1);
+            }
+
+            /*Llenar tabla con mas ganancia */    
+            for (int i = 0; i < MayorGanancia.size(); i++) {    
+                int id = MayorGanancia.get(i);
+                Producto p = ProductosPorID.get(id);
+                tablaMayorGanancia.setValueAt(p.getNombre(), i, 0);
+                tablaMayorGanancia.setValueAt(GananciasProducto.get(id), i, 1);
+            }
+
+            
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar datos en tablas: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        // Fin del panel tablas
+
+        pestanas.addTab("Tablas", PanelTablas);
+
         add(pestanas);
+        setVisible(true);
+
     }
 }
