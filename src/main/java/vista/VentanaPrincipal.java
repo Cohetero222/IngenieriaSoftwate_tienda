@@ -23,7 +23,7 @@ import vista.FormularioVenta;
  */
 public class VentanaPrincipal extends JFrame {
     private JTable tablaProductos;
-    private JButton btnAgregar, btnEditar, btnEliminar, btnReportes, btnRegistrarVenta;
+    private JButton btnAgregar, btnEditar, btnEliminar, btnReportes, btnRegistrarVenta, btnRefresh;
     private JTextField txtBuscador;
 
     public VentanaPrincipal() {
@@ -61,20 +61,28 @@ public class VentanaPrincipal extends JFrame {
         btnEliminar = new JButton("❌ Eliminar");
         btnReportes = new JButton("📊 Reportes");
         btnRegistrarVenta = new JButton("💵 Registrar Venta");
+        //Boton nuevo para refrescar la base de datos
+        btnRefresh = new JButton("🔄 Refresh");
 
         btnAgregar.addActionListener(e -> abrirFormularioProducto());
         btnEditar.addActionListener(e -> editarProducto());
         btnEliminar.addActionListener(e -> eliminarProducto());
         btnReportes.addActionListener(e -> abrirReportes());
-        btnRegistrarVenta.addActionListener(e -> registrarVenta());
-
+        btnRegistrarVenta.addActionListener(e -> registrarVenta());       
+        //Parte para refrescar.
+        btnRefresh.addActionListener(e -> actualizarTabla());
+        
         panelBotones.add(btnAgregar);
         panelBotones.add(btnEditar);
         panelBotones.add(btnEliminar);
         panelBotones.add(btnReportes);
         panelBotones.add(btnRegistrarVenta);
+        //Se agrega el boton refresh al panel.
+        panelBotones.add(btnRefresh);
+
         add(panelBotones, BorderLayout.SOUTH);
 
+        
         // Cargar datos
         actualizarTabla();
     }
@@ -123,13 +131,19 @@ public class VentanaPrincipal extends JFrame {
     }
 
     public void actualizarTabla() {
-        buscarProducto();
         try {
+            // Limpiar el buscador para mostrar todos los productos
+            txtBuscador.setText("");
+            
+            // Recargar todos los productos desde la base de datos
             List<Producto> productos = new ProductoDAO().listarTodos();
             tablaProductos.setModel(new ProductoTableModel(productos));
+            
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error al cargar productos: " + ex.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, 
+                "Error al actualizar los datos: " + ex.getMessage(), 
+                "Error de Base de Datos", 
+                JOptionPane.ERROR_MESSAGE);
         }
     }
 
