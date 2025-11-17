@@ -18,6 +18,7 @@ public class VentanaPrincipal extends JFrame {
     private JTable tablaDeudores;
 
     private JButton btnAgregar, btnEditar, btnEliminar, btnReportes, btnRegistrarVenta, btnDeudores, btnRefresh;
+    private JButton btnDevolucion;
     private JTextField txtBuscador;
 
     public VentanaPrincipal() {
@@ -68,6 +69,7 @@ public class VentanaPrincipal extends JFrame {
         btnReportes = new JButton("📊 Reportes");
         btnRegistrarVenta = new JButton("💵 Registrar Venta");
         btnDeudores = new JButton("💱 Registrar/Editar Deudor");
+    btnDevolucion = new JButton("🔁 Devolución");
         // Boton nuevo para refrescar la base de datos.
         btnRefresh = new JButton("🔄 Refresh");
 
@@ -75,9 +77,10 @@ public class VentanaPrincipal extends JFrame {
         btnEditar.addActionListener(e -> editarProducto());
         btnEliminar.addActionListener(e -> eliminarProducto());
         btnReportes.addActionListener(e -> abrirReportes());
-        btnRegistrarVenta.addActionListener(e -> registrarVenta());
-        // Parte para refrescar.
-        btnRefresh.addActionListener(e -> actualizarTabla());
+    btnRegistrarVenta.addActionListener(e -> registrarVenta());
+    btnDevolucion.addActionListener(e -> registrarDevolucion());
+    // Parte para refrescar.
+    btnRefresh.addActionListener(e -> actualizarTabla());
 
         // BOTÓN PARA ABRIR FORMULARIO DE DEUDORES
         btnDeudores.addActionListener(e -> registrarDeudor());
@@ -86,8 +89,9 @@ public class VentanaPrincipal extends JFrame {
         panelBotones.add(btnEditar);
         panelBotones.add(btnEliminar);
         panelBotones.add(btnReportes);
-        panelBotones.add(btnRegistrarVenta);
-        panelBotones.add(btnDeudores);
+    panelBotones.add(btnRegistrarVenta);
+    panelBotones.add(btnDevolucion);
+    panelBotones.add(btnDeudores);
         // Se agrega el boton refresh al panel.
         panelBotones.add(btnRefresh);
 
@@ -146,6 +150,13 @@ public class VentanaPrincipal extends JFrame {
         } else {
             JOptionPane.showMessageDialog(this, "Seleccione un producto para registrar la venta");
         }
+    }
+
+    private void registrarDevolucion() {
+        // Abrir formulario de devolución (permite escribir nombre o seleccionar si hay duplicados)
+        new FormularioDevolucion(this).setVisible(true);
+        // Refrescar tabla después de la posible devolución
+        actualizarTabla();
     }
 
     private void abrirFormularioProducto() {

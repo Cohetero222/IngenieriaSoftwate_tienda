@@ -142,6 +142,60 @@ public class ProductoDAO {
     }
 
     /**
+     * Registra una devolución: aumenta la cantidad y resta de ventas.
+     * Valida que las ventas no queden negativas.
+     */
+    public boolean devolverProducto(int idProducto, int cantidad) throws SQLException {
+        if (cantidad <= 0) throw new IllegalArgumentException("Cantidad debe ser mayor que cero");
+
+        Connection conn = null;
+        try {
+            conn = ConexionSQLite.conectar();
+            conn.setAutoCommit(false);
+
+            // 1) Comprobar ventas actuales
+            String sqlCheck = "SELECT ventas FROM productos WHERE id = ?";
+            int ventasActual = 0;
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlCheck)) {
+                pstmt.setInt(1, idProducto);
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        ventasActual = rs.getInt("ventas");
+                    } else {
+                        throw new SQLException("Producto no encontrado");
+                    }
+                }
+            }
+
+            if (ventasActual - cantidad < 0) {
+                throw new SQLException("Devolución inválida: ventas actuales=" + ventasActual + ", no se puede devolver " + cantidad);
+            }
+
+            // 2) Aplicar la devolución
+            String sqlUpdate = "UPDATE productos SET cantidad = cantidad + ?, ventas = ventas - ? WHERE id = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlUpdate)) {
+                pstmt.setInt(1, cantidad);
+                pstmt.setInt(2, cantidad);
+                pstmt.setInt(3, idProducto);
+
+                int rows = pstmt.executeUpdate();
+                if (rows == 0) throw new SQLException("Error al aplicar devolución, producto no encontrado");
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) conn.rollback();
+            throw e;
+        } finally {
+            if (conn != null) {
+                conn.setAutoCommit(true);
+                conn.close();
+            }
+        }
+    }
+
+    /**
      * Registra una venta detallada (transaccional)
      */
     public boolean registrarVentaDetallada(Venta venta) throws SQLException {
