@@ -1,7 +1,6 @@
 package modelo;
 
 import java.sql.*;
-<<<<<<< HEAD
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -14,11 +13,19 @@ public class VentaDAO {
             "FROM ventas v " + "JOIN productos p ON v.id_producto = p.id "
             + "WHERE datetime(v.fecha) BETWEEN datetime(?) AND datetime(?);";
 
-=======
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VentaDAO {
->>>>>>> 9596c3dff79a57d762061ad282a51c7a71227398
+    /* Obtener ventas por fecha */
+    private static final String SelectVentasPorFechaSQL = "SELECT v.id, v.cantidad, v.precio_unitario, v.fecha, "
+            + "p.id AS id_producto, p.nombre, p.categoria " +
+            "FROM ventas v " + "JOIN productos p ON v.id_producto = p.id "
+            + "WHERE datetime(v.fecha) BETWEEN datetime(?) AND datetime(?);";
+
+>>>>>>> origin/main
     private static final String INSERT_VENTA_SQL = "INSERT INTO ventas (id_producto, cantidad, precio_unitario, fecha) VALUES (?, ?, ?, ?)";
     private static final String UPDATE_STOCK_SQL = "UPDATE productos SET cantidad = cantidad - ?, ventas = ventas + ? WHERE id = ?";
 
@@ -70,6 +77,9 @@ public class VentaDAO {
         }
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> origin/main
 
     /* Metodo para filtrar las ventas (mes pasado) */
     public static List<Venta> obtenerVentasPorFecha(Date fechaInicio, Date fechaFin) throws SQLException {
@@ -113,6 +123,9 @@ public class VentaDAO {
 
         return ventas;
     }
+<<<<<<< HEAD
 =======
 >>>>>>> 9596c3dff79a57d762061ad282a51c7a71227398
+=======
+>>>>>>> origin/main
 }

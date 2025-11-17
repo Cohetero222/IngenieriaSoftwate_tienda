@@ -1,40 +1,32 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package vista;
 
 import modelo.Producto;
 import modelo.ProductoDAO;
+import modelo.Deudores;
+import modelo.DeudoresDAO;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.sql.SQLException;
 import java.util.List;
-import modelo.Venta;
-import modelo.VentaDAO;
-import vista.FormularioVenta;
 
-/**
- *
- * @author omarf
- */
 public class VentanaPrincipal extends JFrame {
+
     private JTable tablaProductos;
-    private JButton btnAgregar, btnEditar, btnEliminar, btnReportes, btnRegistrarVenta;
+    private JTable tablaDeudores;
+
+    private JButton btnAgregar, btnEditar, btnEliminar, btnReportes, btnRegistrarVenta, btnDeudores, btnRefresh;
     private JTextField txtBuscador;
 
     public VentanaPrincipal() {
         setTitle("Gestión de Tienda");
-        setSize(1000, 600);
+        setSize(1100, 650);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // =======================================================
-        // Panel del Buscador (Sección NORTH)
-        // =======================================================
+        // Panel del Buscador
         JPanel panelBuscador = new JPanel(new FlowLayout(FlowLayout.CENTER));
         txtBuscador = new JTextField(25);
 
@@ -42,7 +34,7 @@ public class VentanaPrincipal extends JFrame {
         panelBuscador.add(txtBuscador);
         add(panelBuscador, BorderLayout.NORTH);
 
-        // Agregar el listener al buscador
+        // Listener de búsqueda
         txtBuscador.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent evt) {
@@ -50,43 +42,109 @@ public class VentanaPrincipal extends JFrame {
             }
         });
 
-        // Tabla de productos
-        tablaProductos = new JTable(new ProductoTableModel());
-        add(new JScrollPane(tablaProductos), BorderLayout.CENTER);
+        // =============================
+        // 📌 TABS PRODUCTOS / DEUDORES
+        // =============================
+        JTabbedPane tabs = new JTabbedPane();
 
-        // Botones
+        // TABLA PRODUCTOS
+        tablaProductos = new JTable(new ProductoTableModel());
+        tabs.addTab("Productos", new JScrollPane(tablaProductos));
+
+        // TABLA DEUDORES
+        tablaDeudores = new JTable(new DeudorTableModel());
+        tabs.addTab("Deudores", new JScrollPane(tablaDeudores));
+
+        add(tabs, BorderLayout.CENTER);
+
+        // =============================
+        // BOTONES
+        // =============================
         JPanel panelBotones = new JPanel();
-        btnAgregar = new JButton("➕ Agregar");
+
+        btnAgregar = new JButton("➕ Agregar Producto");
         btnEditar = new JButton("✏️ Editar");
         btnEliminar = new JButton("❌ Eliminar");
         btnReportes = new JButton("📊 Reportes");
         btnRegistrarVenta = new JButton("💵 Registrar Venta");
+        btnDeudores = new JButton("💱 Registrar/Editar Deudor");
+        // Boton nuevo para refrescar la base de datos.
+        btnRefresh = new JButton("🔄 Refresh");
 
         btnAgregar.addActionListener(e -> abrirFormularioProducto());
         btnEditar.addActionListener(e -> editarProducto());
         btnEliminar.addActionListener(e -> eliminarProducto());
         btnReportes.addActionListener(e -> abrirReportes());
         btnRegistrarVenta.addActionListener(e -> registrarVenta());
+        // Parte para refrescar.
+        btnRefresh.addActionListener(e -> actualizarTabla());
+
+        // BOTÓN PARA ABRIR FORMULARIO DE DEUDORES
+        btnDeudores.addActionListener(e -> registrarDeudor());
 
         panelBotones.add(btnAgregar);
         panelBotones.add(btnEditar);
         panelBotones.add(btnEliminar);
         panelBotones.add(btnReportes);
         panelBotones.add(btnRegistrarVenta);
+        panelBotones.add(btnDeudores);
+        // Se agrega el boton refresh al panel.
+        panelBotones.add(btnRefresh);
+
         add(panelBotones, BorderLayout.SOUTH);
 
         // Cargar datos
         actualizarTabla();
+        cargarTablaDeudores();
     }
+
+    // ============================================================
+    // 📌 MÉTODOS DE DEUDORES
+    // ============================================================
+
+    private void registrarDeudor() {
+        int fila = tablaDeudores.getSelectedRow();
+
+        if (fila >= 0) {
+            // Editar deudor
+            int idDeudor = (int) tablaDeudores.getValueAt(fila, 0);
+
+            try {
+                Deudores d = new DeudoresDAO().buscarPorId(idDeudor);
+                new FormularioDeudor(this, d).setVisible(true);
+
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(this, "Error al cargar deudor: " + e.getMessage());
+            }
+
+        } else {
+            // Nuevo deudor
+            new FormularioDeudor(this).setVisible(true);
+        }
+
+        cargarTablaDeudores(); // refrescar
+    }
+
+    private void cargarTablaDeudores() {
+        try {
+            List<Deudores> lista = new DeudoresDAO().listarTodos();
+            tablaDeudores.setModel(new DeudorTableModel(lista));
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error al cargar deudores: " + ex.getMessage());
+        }
+    }
+
+    // ============================================================
+    // PRODUCTOS
+    // ============================================================
 
     private void registrarVenta() {
         int fila = tablaProductos.getSelectedRow();
         if (fila >= 0) {
             int idProducto = (int) tablaProductos.getValueAt(fila, 0);
-            new FormularioVenta(this, idProducto).setVisible(true); // Debes implementar esta clase
+            new FormularioVenta(this, idProducto).setVisible(true);
         } else {
-            JOptionPane.showMessageDialog(this, "Seleccione un producto para registrar la venta", "Error",
-                    JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleccione un producto para registrar la venta");
         }
     }
 
@@ -100,7 +158,7 @@ public class VentanaPrincipal extends JFrame {
             int id = (int) tablaProductos.getValueAt(fila, 0);
             new FormularioProducto(this, id).setVisible(true);
         } else {
-            JOptionPane.showMessageDialog(this, "Seleccione un producto", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleccione un producto");
         }
     }
 
@@ -112,8 +170,7 @@ public class VentanaPrincipal extends JFrame {
                 new ProductoDAO().eliminarProducto(id);
                 actualizarTabla();
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this, "Error al eliminar: " + ex.getMessage(), "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error al eliminar: " + ex.getMessage());
             }
         }
     }
@@ -128,44 +185,57 @@ public class VentanaPrincipal extends JFrame {
             List<Producto> productos = new ProductoDAO().listarTodos();
             tablaProductos.setModel(new ProductoTableModel(productos));
 <<<<<<< HEAD
+<<<<<<< HEAD
             //Reaplicar renderer y repintar cada vez que cambie un modelo
             tablaProductos.setDefaultRenderer(Object.class, new ProductoCellRenderer());
             tablaProductos.revalidate();
             tablaProductos.repaint();
 =======
 >>>>>>> 9596c3dff79a57d762061ad282a51c7a71227398
+=======
+            tablaProductos.setDefaultRenderer(Object.class, new ProductoCellRenderer());
+>>>>>>> origin/main
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error al cargar productos: " + ex.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error al cargar productos: " + ex.getMessage());
         }
     }
 
-    // Buscador
-    private void buscarProducto() {
-        String textoBusqueda = txtBuscador.getText().trim();
-
+    public void actualizarTabla2() {
         try {
-            List<Producto> productos;
-            ProductoDAO dao = new ProductoDAO();
+            // Limpiar el buscador para mostrar todos los productos
+            txtBuscador.setText("");
 
-            if (textoBusqueda.isEmpty()) {
-                // Si el campo está vacío, listar todos (como actualización normal)
-                productos = dao.listarTodos();
-            } else {
-                // Si hay texto, buscar usando el nuevo método DAO
-                productos = dao.buscarPorNombre(textoBusqueda);
-            }
-
-            // Actualizar la tabla con los resultados (o la lista completa)
+            // Recargar todos los productos desde la base de datos
+            List<Producto> productos = new ProductoDAO().listarTodos();
             tablaProductos.setModel(new ProductoTableModel(productos));
 
 <<<<<<< HEAD
         } catch (SQLException ex) {     
 =======
         } catch (SQLException ex) {
+<<<<<<< HEAD
 >>>>>>> 9596c3dff79a57d762061ad282a51c7a71227398
             JOptionPane.showMessageDialog(this, "Error de búsqueda en la BD: " + ex.getMessage(), "Error",
+=======
+            JOptionPane.showMessageDialog(this,
+                    "Error al actualizar los datos: " + ex.getMessage(),
+                    "Error de Base de Datos",
+>>>>>>> origin/main
                     JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void buscarProducto() {
+        String texto = txtBuscador.getText().trim();
+
+        try {
+            ProductoDAO dao = new ProductoDAO();
+            List<Producto> productos = texto.isEmpty() ? dao.listarTodos() : dao.buscarPorNombre(texto);
+
+            tablaProductos.setModel(new ProductoTableModel(productos));
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error de búsqueda: " + ex.getMessage());
         }
     }
 }

@@ -28,6 +28,7 @@ public class Producto {
 
     public Producto(String nombre, String marca, String categoria, int cantidad,
             String estado, int ventas, LocalDate fechaCaducidad, double precio, double costo) {
+
         this.nombre = nombre;
         this.marca = marca;
         this.categoria = categoria;
@@ -37,6 +38,7 @@ public class Producto {
         this.fechaCaducidad = fechaCaducidad;
         this.precio = precio;
         this.costo = costo;
+
     }
 
     // Métodos de negocio
