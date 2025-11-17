@@ -61,6 +61,7 @@ public class ProductoTableModel extends AbstractTableModel {
             default -> null;
         };
     }
+<<<<<<< HEAD
 
     public Producto getProductoEn(int fila) {
         if(fila >=0 && fila < productos.size()){
@@ -68,4 +69,6 @@ public class ProductoTableModel extends AbstractTableModel {
         }
         return null;
     }
+=======
+>>>>>>> 9596c3dff79a57d762061ad282a51c7a71227398
 }

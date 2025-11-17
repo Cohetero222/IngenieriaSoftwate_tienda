@@ -17,9 +17,12 @@ public class Venta {
     private double precioUnitario;
     private LocalDateTime fecha;
 
+<<<<<<< HEAD
     /*Contructor default */
     public Venta() {}
     
+=======
+>>>>>>> 9596c3dff79a57d762061ad282a51c7a71227398
     // Constructor completo
     public Venta(int id, Producto producto, int cantidad, double precioUnitario, LocalDateTime fecha) {
         this.id = id;

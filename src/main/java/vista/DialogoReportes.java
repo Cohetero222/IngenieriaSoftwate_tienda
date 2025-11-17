@@ -8,6 +8,7 @@ import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Comparator; // Necesario para ordenar si se desea
+<<<<<<< HEAD
 import java.util.HashMap;
 import java.time.LocalDate; //Para el calculo de fechas
 import java.time.format.TextStyle;
@@ -21,6 +22,12 @@ import modelo.VentaDAO;
 public class DialogoReportes extends JDialog {
     public DialogoReportes(JFrame parent) {
 
+=======
+
+public class DialogoReportes extends JDialog {
+
+    public DialogoReportes(JFrame parent) {
+>>>>>>> 9596c3dff79a57d762061ad282a51c7a71227398
         // Llama al constructor de JDialog: padre, título, modal (true)
         super(parent, "Reportes", true);
         setSize(800, 600);
@@ -45,10 +52,16 @@ public class DialogoReportes extends JDialog {
                         return;
                     }
 
+<<<<<<< HEAD
                     // Limitar a los 10 productos mas venidos durante el mes
                     productos = productos.stream()
                             .sorted(Comparator.comparingInt(Producto::getVentas).reversed()).
                             limit(10).toList();
+=======
+                    // Opcional: limitar el número de barras si la lista es muy grande
+                    // productos =
+                    // productos.stream().sorted(Comparator.comparingInt(Producto::getVentas).reversed()).limit(10).toList();
+>>>>>>> 9596c3dff79a57d762061ad282a51c7a71227398
 
                     // Obtiene el máximo de ventas para escalar el gráfico
                     int maxVentas = productos.stream()
@@ -60,6 +73,7 @@ public class DialogoReportes extends JDialog {
                     // base Y se define cerca de la parte inferior del panel
                     int baseY = getHeight() - 50;
 
+<<<<<<< HEAD
                     // Obtenemos el mes pasado
                     LocalDate fechaActual = LocalDate.now();
                     LocalDate mesPasadoDate = fechaActual.minusMonths(1);
@@ -80,10 +94,13 @@ public class DialogoReportes extends JDialog {
                     int tituloWidth = g.getFontMetrics().stringWidth(titulo);
                     g.drawString(titulo, (getWidth() - tituloWidth) / 2, 30);
 
+=======
+>>>>>>> 9596c3dff79a57d762061ad282a51c7a71227398
                     // Se dibuja un eje X
                     g.setColor(Color.BLACK);
                     g.drawLine(x - 10, baseY, getWidth() - 50, baseY);
 
+<<<<<<< HEAD
                     // Se dibuja el eje Y
                     g.drawLine(x - 10, baseY, getWidth() - 50, baseY);
 
@@ -106,6 +123,8 @@ public class DialogoReportes extends JDialog {
                     g2d.rotate(-Math.PI / 2);
                     g2d.rotate(Math.PI / 2);
 
+=======
+>>>>>>> 9596c3dff79a57d762061ad282a51c7a71227398
                     for (Producto p : productos) {
                         // Calcula la altura de la barra, escalando hasta un máximo de 300px
                         int altura = (int) ((p.getVentas() / (double) maxVentas) * 300);
@@ -119,6 +138,7 @@ public class DialogoReportes extends JDialog {
                         g.drawRect(x, baseY - altura, barWidth, altura);
 
                         // Dibuja el nombre del producto
+<<<<<<< HEAD
                         g.setColor(Color.BLACK);
                         g.setFont(new Font("Arial", Font.PLAIN, 11));
 
@@ -158,6 +178,9 @@ public class DialogoReportes extends JDialog {
                             int textWidth = g.getFontMetrics().stringWidth(nombre);
                             g.drawString(nombre, x + (barWidth - textWidth) / 2, baseY + 15);
                         }
+=======
+                        g.drawString(p.getNombre(), x, baseY + 20);
+>>>>>>> 9596c3dff79a57d762061ad282a51c7a71227398
 
                         // Mueve la posición X para la siguiente barra
                         x += barWidth + 20;
@@ -168,11 +191,16 @@ public class DialogoReportes extends JDialog {
             }
         }; // Fin del panelVendidos
 
+<<<<<<< HEAD
         pestanas.addTab("Grafica", panelVendidos);
+=======
+        pestanas.addTab("Más Vendidos", panelVendidos);
+>>>>>>> 9596c3dff79a57d762061ad282a51c7a71227398
 
         // 2️⃣ Pestaña: Estado de productos (gráfico de pastel) - Lógica ya era
         // funcional
         JPanel panelEstados = new JPanel() {
+<<<<<<< HEAD
 
             @Override
 
@@ -181,6 +209,11 @@ public class DialogoReportes extends JDialog {
                 super.paintComponent(g);
 
                 /* Lógica del gráfico de pastel */
+=======
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+>>>>>>> 9596c3dff79a57d762061ad282a51c7a71227398
                 try {
                     ProductoDAO dao = new ProductoDAO();
                     List<Producto> productos = dao.listarTodos();
@@ -227,6 +260,7 @@ public class DialogoReportes extends JDialog {
 
         pestanas.addTab("Estados", panelEstados);
 
+<<<<<<< HEAD
 
         /* Panel de tablas */
         JPanel PanelTablas = new JPanel();
@@ -374,5 +408,8 @@ public class DialogoReportes extends JDialog {
         add(pestanas);
         setVisible(true);
 
+=======
+        add(pestanas);
+>>>>>>> 9596c3dff79a57d762061ad282a51c7a71227398
     }
 }
