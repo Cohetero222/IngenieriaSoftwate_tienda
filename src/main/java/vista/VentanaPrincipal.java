@@ -11,6 +11,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.ArrayList;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -69,7 +70,7 @@ public class VentanaPrincipal extends JFrame {
         btnReportes = new JButton("📊 Reportes");
         btnRegistrarVenta = new JButton("💵 Registrar Venta");
         btnDeudores = new JButton("💱 Registrar/Editar Deudor");
-    btnDevolucion = new JButton("🔁 Devolución");
+        btnDevolucion = new JButton("🔁 Devolución");
         // Boton nuevo para refrescar la base de datos.
         btnRefresh = new JButton("🔄 Refresh");
 
@@ -77,10 +78,10 @@ public class VentanaPrincipal extends JFrame {
         btnEditar.addActionListener(e -> editarProducto());
         btnEliminar.addActionListener(e -> eliminarProducto());
         btnReportes.addActionListener(e -> abrirReportes());
-    btnRegistrarVenta.addActionListener(e -> registrarVenta());
-    btnDevolucion.addActionListener(e -> registrarDevolucion());
-    // Parte para refrescar.
-    btnRefresh.addActionListener(e -> actualizarTabla());
+        btnRegistrarVenta.addActionListener(e -> registrarVenta());
+        btnDevolucion.addActionListener(e -> registrarDevolucion());
+        // Parte para refrescar.
+        btnRefresh.addActionListener(e -> actualizarTabla());
 
         // BOTÓN PARA ABRIR FORMULARIO DE DEUDORES
         btnDeudores.addActionListener(e -> registrarDeudor());
@@ -89,9 +90,9 @@ public class VentanaPrincipal extends JFrame {
         panelBotones.add(btnEditar);
         panelBotones.add(btnEliminar);
         panelBotones.add(btnReportes);
-    panelBotones.add(btnRegistrarVenta);
-    panelBotones.add(btnDevolucion);
-    panelBotones.add(btnDeudores);
+        panelBotones.add(btnRegistrarVenta);
+        panelBotones.add(btnDevolucion);
+        panelBotones.add(btnDeudores);
         // Se agrega el boton refresh al panel.
         panelBotones.add(btnRefresh);
 
@@ -143,10 +144,14 @@ public class VentanaPrincipal extends JFrame {
     // ============================================================
 
     private void registrarVenta() {
-        int fila = tablaProductos.getSelectedRow();
-        if (fila >= 0) {
-            int idProducto = (int) tablaProductos.getValueAt(fila, 0);
-            new FormularioVenta(this, idProducto).setVisible(true);
+        int[] filas = tablaProductos.getSelectedRows();
+        if (filas.length > 0) {
+            ArrayList<Integer> idsProductos = new ArrayList<>();
+                for(int fila : filas){
+                    int idProducto = (int) tablaProductos.getValueAt(fila, 0);
+                    idsProductos.add(idProducto);
+                }
+                new FormularioVenta(this, idsProductos).setVisible(true);
         } else {
             JOptionPane.showMessageDialog(this, "Seleccione un producto para registrar la venta");
         }

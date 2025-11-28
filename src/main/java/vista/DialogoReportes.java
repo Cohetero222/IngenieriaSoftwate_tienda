@@ -1,5 +1,6 @@
 package vista;
 
+import modelo.DetalleVenta;
 import modelo.Producto;
 import modelo.ProductoDAO;
 
@@ -218,25 +219,40 @@ public class DialogoReportes extends JDialog {
             List<Venta> ventasMes = VentaDAO.obtenerVentasPorFecha(FechaInicioSQL, FechaFinSQL);
 
             /*Si no hay ventas: */
-            if(ventasMes.isEmpty())
-             JOptionPane.showMessageDialog(this, "No hay ventas en el mes pasado.");
-            
+            if(ventasMes.isEmpty()){
+                JOptionPane.showMessageDialog(this, "No hay ventas en el mes pasado.");
+                return;
+            }
+             
+
+
+/*Prueba */
+System.out.println("VENTAS ENCONTRADAS: " + ventasMes.size());
+for (Venta v : ventasMes) {
+    System.out.println("Venta ID=" + v.getId() + " Fecha=" + v.getFecha());
+}
+
+
              /*Agrupacion por id */
 
              Map<Integer, Integer> CantVendidas = new HashMap<>();
              Map<Integer, Double> GananciasProducto = new HashMap<>();
              Map<Integer, Producto> ProductosPorID = new HashMap<>();
 
-            for(Venta v : ventasMes){
-                int id = v.getProducto().getId();
-                ProductosPorID.put(id, v.getProducto());
+            for(Venta v: ventasMes){
+                System.out.println("DETALLES DE LA VENTA " + v.getId() + ": " + v.getVentaDetalles().size());
 
-                /*Cantidad vendida */
-                CantVendidas.put(id, CantVendidas.getOrDefault(id, 0) + v.getCantidad());
+                for(DetalleVenta dv : v.getVentaDetalles()){
+                    int id = dv.getProducto().getId();
+                    ProductosPorID.put(id, dv.getProducto());
 
-                /*Calcular ganancia */
-                double Ganancia = v.getCantidad() * v.getPrecioUnitario();
-                GananciasProducto.put(id, GananciasProducto.getOrDefault(id, 0.0) + Ganancia);
+                    /*Cantidad vendida */
+                    CantVendidas.put(id, CantVendidas.getOrDefault(id, 0) + dv.getCantidad());
+
+                    /*Calcular ganancia */
+                    double Ganancia = dv.getCantidad() * dv.getPrecioUnitario();
+                    GananciasProducto.put(id, GananciasProducto.getOrDefault(id, 0.0) + Ganancia);
+                }
             }
 
             /*Creacion de listas */
@@ -264,6 +280,14 @@ public class DialogoReportes extends JDialog {
                 tablaMasVendidos.setValueAt(CantVendidas.get(id), i, 1);
             }
 
+            // Verificar filas vacías
+for (int i = 0; i < tablaMasVendidos.getRowCount(); i++) {
+    if (filaEstaVacia(tablaMasVendidos, i)) {
+        System.out.println("Fila vacía en tablaMasVendidos: " + i);
+    }
+}
+
+
             /*Llenar tablas de menos vendidos */
             for (int i = 0; i < MenosVendidos.size(); i++) {
                 int id = MenosVendidos.get(i);
@@ -271,6 +295,11 @@ public class DialogoReportes extends JDialog {
                 tablaMenosVendidos.setValueAt(p.getNombre(), i, 0);
                 tablaMenosVendidos.setValueAt(CantVendidas.get(id), i, 1);
             }
+for (int i = 0; i < tablaMenosVendidos.getRowCount(); i++) {
+    if (filaEstaVacia(tablaMenosVendidos, i)) {
+        System.out.println("Fila vacía en tablaMenosVendidos: " + i);
+    }
+}
 
             /*Llenar tabla con mas ganancia */    
             for (int i = 0; i < MayorGanancia.size(); i++) {    
@@ -279,6 +308,11 @@ public class DialogoReportes extends JDialog {
                 tablaMayorGanancia.setValueAt(p.getNombre(), i, 0);
                 tablaMayorGanancia.setValueAt(GananciasProducto.get(id), i, 1);
             }
+for (int i = 0; i < tablaMayorGanancia.getRowCount(); i++) {
+    if (filaEstaVacia(tablaMayorGanancia, i)) {
+        System.out.println("Fila vacía en tablaMayorGanancia: " + i);
+    }
+}
 
             
 
@@ -291,7 +325,15 @@ public class DialogoReportes extends JDialog {
         pestanas.addTab("Tablas", PanelTablas);
 
         add(pestanas);
-        setVisible(true);
-
     }
+private boolean filaEstaVacia(JTable tabla, int fila) {
+    for (int c = 0; c < tabla.getColumnCount(); c++) {
+        Object v = tabla.getValueAt(fila, c);
+        if (v != null && !v.toString().trim().isEmpty()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 }

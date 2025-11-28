@@ -211,12 +211,15 @@ public class ProductoDAO {
             try (PreparedStatement pstmt = conn.prepareStatement(sqlVenta, Statement.RETURN_GENERATED_KEYS)) {
 
                 // NOTA: Asumiendo que Venta tiene getProducto().getId() y getPrecioUnitario()
-                pstmt.setInt(1, venta.getProducto().getId());
-                pstmt.setInt(2, venta.getCantidad());
-                pstmt.setDouble(3, venta.getPrecioUnitario());
-                pstmt.setTimestamp(4, Timestamp.valueOf(venta.getFecha()));
-                pstmt.executeUpdate();
-
+                List<DetalleVenta> Detalles = venta.getVentaDetalles();
+                for(DetalleVenta V : Detalles){
+                    pstmt.setInt(1, V.getProducto().getId());
+                    pstmt.setInt(2, V.getCantidad());
+                    pstmt.setDouble(3, V.getPrecioUnitario());
+                    pstmt.setTimestamp(4,    Timestamp.valueOf(venta.getFecha()));
+                    pstmt.executeUpdate();
+                }
+                
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
                         venta.setId(rs.getInt(1));
@@ -228,7 +231,8 @@ public class ProductoDAO {
             // sección.
 
             // 2. Actualizar stock del producto
-            registrarVenta(conn, venta.getProducto().getId(), venta.getCantidad());
+            for(DetalleVenta V : venta.getVentaDetalles())
+                registrarVenta(conn, V.getProducto().getId(), V.getCantidad());
 
             conn.commit();
             return true;
@@ -255,10 +259,8 @@ public class ProductoDAO {
             pstmt.setInt(1, idProducto);
             ResultSet rs = pstmt.executeQuery();
 
-            Producto producto = buscarPorId(idProducto);
-
             while (rs.next()) {
-                ventas.add(mapearVenta(rs, producto));
+                ventas.add(mapearVenta(rs));
             }
         }
         return ventas;
@@ -307,13 +309,35 @@ public class ProductoDAO {
         return p;
     }
 
-    private Venta mapearVenta(ResultSet rs, Producto producto) throws SQLException {
-        return new Venta(
-                rs.getInt("id"),
-                producto,
-                rs.getInt("cantidad"),
-                rs.getDouble("precio_unitario"),
-                rs.getTimestamp("fecha").toLocalDateTime());
+    private Venta mapearVenta(ResultSet rs) throws SQLException {
+        Venta venta = new Venta();
+        venta.setId(rs.getInt("id"));
+        venta.setFecha(rs.getTimestamp("fecha").toLocalDateTime());
 
+        /*creamos la lista de detalles */
+        List<DetalleVenta> detalles = new ArrayList<>();
+        do {
+            Producto producto = new Producto(
+            rs.getString("nombre"),
+            rs.getString("marca"),
+            rs.getString("categoria"),
+            rs.getInt("cantidad_producto"),
+            rs.getString("estado"),
+            rs.getInt("ventas"),
+            rs.getDate("fecha_caducidad").toLocalDate(),
+            rs.getDouble("precio"),
+            rs.getDouble("costo")
+            );
+
+            DetalleVenta detalle = new DetalleVenta(
+                    producto,
+                    rs.getInt("cantidad"),
+                    rs.getDouble("precio_unitario")); 
+            detalles.add(detalle);
+            /*Meintras corresponda a la misma venta sigue leyendo */
+        } while (rs.next() && rs.getInt("id") == venta.getId()); 
+        venta.setVentaDetalles(detalles);
+        return venta;
     }
+        
 }
