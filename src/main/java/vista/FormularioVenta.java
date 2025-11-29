@@ -119,7 +119,7 @@ public class FormularioVenta extends JDialog {
         JScrollPane scroll = new JScrollPane(panelCentral);
         add(scroll, BorderLayout.CENTER);
         // Botones
-        JPanel panelBotones = new JPanel();
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnRegistrar = new JButton("Guardar");
         btnCancelar = new JButton("Cancelar");
 
