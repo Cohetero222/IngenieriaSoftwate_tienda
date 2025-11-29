@@ -37,17 +37,25 @@ public class ConexionSQLiteDevolver {
                     categoria TEXT NOT NULL,
                     cantidad INTEGER DEFAULT 0,
                     precio REAL,
-                    costo REAL
+                    costo REAL,
+                    pagado INTEGER DEFAULT 0
                 );
                 """;
 
         try (Connection conn = conectar();
-             Statement stmt = conn.createStatement()) {
+     Statement stmt = conn.createStatement()) {
 
-            stmt.execute(sqlDeudores);
+    // Crear tabla si no existe
+    stmt.execute(sqlDeudores);
 
-        } catch (SQLException e) {
-            System.err.println("Error al inicializar la base de datos: " + e.getMessage());
-        }
+    // 🔥 Añadir columna pagado si no existe
+    stmt.execute("ALTER TABLE deudores ADD COLUMN pagado INTEGER DEFAULT 0;");
+    
+} catch (SQLException e) {
+    // Ignorar si la columna ya existe
+    if (!e.getMessage().contains("duplicate column name")) {
+        System.err.println("Error actualizando tabla: " + e.getMessage());
+    }
+}
     }
 }

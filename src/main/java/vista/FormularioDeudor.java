@@ -2,6 +2,8 @@ package vista;
 
 import java.awt.GridLayout;
 import javax.swing.*;
+import java.awt.FlowLayout;
+import java.awt.BorderLayout;
 import modelo.Deudores;
 import modelo.DeudoresDAO;
 
@@ -9,7 +11,8 @@ public class FormularioDeudor extends JDialog {
 
     private JTextField txtNombre, txtProducto, txtMarca, txtCategoria,
             txtCantidad, txtPrecio, txtCosto;
-
+     
+    private JCheckBox chkPagado; //CheckBox para Pagado
     private JButton btnGuardar, btnCancelar;
 
     private Deudores deudor;
@@ -20,9 +23,12 @@ public class FormularioDeudor extends JDialog {
 
         this.deudor = (d != null) ? d : new Deudores();
 
-        setSize(400, 400);
+        setSize(400, 450);
         setLocationRelativeTo(parent);
-        setLayout(new GridLayout(9, 2, 10, 10));
+        setLayout(new GridLayout(10, 2, 10, 10));
+
+         // Panel principal con los campos en GridLayout
+        JPanel panelCampos = new JPanel(new GridLayout(9, 2, 10, 10));
 
         add(new JLabel("Nombre del deudor:"));
         txtNombre = new JTextField(deudor.getNombre());
@@ -52,11 +58,23 @@ public class FormularioDeudor extends JDialog {
         txtCosto = new JTextField(String.valueOf(deudor.getCosto()));
         add(txtCosto);
 
-        btnGuardar = new JButton("💾 Guardar");
-        btnCancelar = new JButton("❌ Cancelar");
+        // Nuevo apartado pagado 
+        add(new JLabel("Pagado:"));
+        chkPagado = new JCheckBox("¿Ya pagó?");
+        chkPagado.setSelected(deudor.isPagado());
+        add(chkPagado);
 
-        add(btnGuardar);
-        add(btnCancelar);
+       // Panel para botones alineados a la derecha
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        btnGuardar = new JButton(" Guardar");
+        btnCancelar = new JButton(" Cancelar");
+
+        panelBotones.add(btnGuardar);
+        panelBotones.add(btnCancelar);
+
+        // Agregar paneles al diálogo
+        add(panelCampos, BorderLayout.CENTER);
+        add(panelBotones, BorderLayout.SOUTH);
 
         btnGuardar.addActionListener(e -> guardar());
         btnCancelar.addActionListener(e -> dispose());
@@ -76,6 +94,7 @@ public class FormularioDeudor extends JDialog {
             deudor.setCantidad(Integer.parseInt(txtCantidad.getText()));
             deudor.setPrecio(Double.parseDouble(txtPrecio.getText()));
             deudor.setCosto(Double.parseDouble(txtCosto.getText()));
+            deudor.setPagado(chkPagado.isSelected()); 
 
             DeudoresDAO dao = new DeudoresDAO();
 

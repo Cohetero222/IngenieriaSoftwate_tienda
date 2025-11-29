@@ -10,6 +10,7 @@ public class Deudores {
     private int cantidad;
     private double precio;
     private double costo;
+    private boolean pagado;
 
     // Constructor vacío
     public Deudores() {
@@ -17,7 +18,7 @@ public class Deudores {
 
     // Constructor con todos los campos menos id (porque es autoincrement)
     public Deudores(String nombre, String producto, String marca,
-            String categoria, int cantidad, double precio, double costo) {
+            String categoria, int cantidad, double precio, double costo, boolean pagado) {
         this.nombre = nombre;
         this.producto = producto;
         this.marca = marca;
@@ -25,6 +26,7 @@ public class Deudores {
         this.cantidad = cantidad;
         this.precio = precio;
         this.costo = costo;
+        this.pagado = pagado;
     }
 
     // Getters y Setters
@@ -84,11 +86,29 @@ public class Deudores {
         this.precio = precio;
     }
 
+    public boolean isPagado() {
+    return pagado;
+}
+
+public void setPagado(boolean pagado) {
+    this.pagado = pagado;
+}
+
     public double getCosto() {
         return costo;
     }
 
     public void setCosto(double costo) {
         this.costo = costo;
+    }
+
+     //Metodo para mostrar "Si"/"No" en la tabla
+    public String getPagadoAsString() {
+        return pagado ? "Si" : "No";
+    }
+    
+    //Metodo para convertir de String a boolean
+    public static boolean parsePagado(String texto) {
+        return "Si".equalsIgnoreCase(texto) || "Sí".equalsIgnoreCase(texto) || "true".equalsIgnoreCase(texto);
     }
 }

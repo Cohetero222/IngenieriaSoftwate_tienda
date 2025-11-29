@@ -10,8 +10,8 @@ public class DeudoresDAO {
     public void agregarDeudor(Deudores d) throws SQLException {
         String sql = """
                     INSERT INTO deudores
-                    (nombre, producto, marca, categoria, cantidad, precio, costo)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    (nombre, producto, marca, categoria, cantidad, precio, costo, pagado)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         try (Connection conn = ConexionSQLiteDevolver.conectar();
@@ -68,7 +68,7 @@ public class DeudoresDAO {
         String sql = """
                     UPDATE deudores SET
                     nombre = ?, producto = ?, marca = ?, categoria = ?,
-                    cantidad = ?, precio = ?, costo = ?
+                    cantidad = ?, precio = ?, costo = ?, pagado = ?
                     WHERE id = ?
                 """;
 
@@ -76,7 +76,7 @@ public class DeudoresDAO {
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             setDeudorParameters(pstmt, d);
-            pstmt.setInt(8, d.getId());
+            pstmt.setInt(9, d.getId());
             pstmt.executeUpdate();
         }
     }
@@ -103,6 +103,7 @@ public class DeudoresDAO {
         pstmt.setInt(5, d.getCantidad());
         pstmt.setDouble(6, d.getPrecio());
         pstmt.setDouble(7, d.getCosto());
+        pstmt.setBoolean(8, d.isPagado());
     }
 
     private Deudores mapearDeudor(ResultSet rs) throws SQLException {
@@ -115,6 +116,30 @@ public class DeudoresDAO {
         d.setCantidad(rs.getInt("cantidad"));
         d.setPrecio(rs.getDouble("precio"));
         d.setCosto(rs.getDouble("costo"));
+        
+        // Manejar diferentes tipos de datos para 'pagado'
+        try {
+            // Intentar como booleano primero
+            d.setPagado(rs.getBoolean("pagado"));
+        } catch (SQLException e1) {
+            try {
+                // Si falla, intentar como integer (0/1)
+                int pagadoInt = rs.getInt("pagado");
+                d.setPagado(pagadoInt == 1);
+            } catch (SQLException e2) {
+                try {
+                    // Si falla, intentar como string ("Si"/"No")
+                    String pagadoStr = rs.getString("pagado");
+                    d.setPagado("Si".equalsIgnoreCase(pagadoStr) || "1".equals(pagadoStr) || "true".equalsIgnoreCase(pagadoStr));
+                } catch (SQLException e3) {
+                    // Si todo falla, usar valor por defecto
+                    d.setPagado(false);
+                    System.out.println("Advertencia: No se pudo leer la columna 'pagado', usando valor por defecto: false");
+                }
+            }
+        }
+        
+
         return d;
     }
 }

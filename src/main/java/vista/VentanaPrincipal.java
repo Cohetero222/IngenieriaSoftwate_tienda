@@ -133,9 +133,22 @@ public class VentanaPrincipal extends JFrame {
         try {
             List<Deudores> lista = new DeudoresDAO().listarTodos();
             tablaDeudores.setModel(new DeudorTableModel(lista));
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error al cargar deudores: " + ex.getMessage());
-        }
+             //FORZAR LA CONFIGURACIÓN DEL RENDERER
+        tablaDeudores.setDefaultRenderer(Object.class, new DeudorCellRenderer());
+        
+        //  OPCIONAL: Aplicar también a tipos específicos
+        tablaDeudores.setDefaultRenderer(String.class, new DeudorCellRenderer());
+        tablaDeudores.setDefaultRenderer(Integer.class, new DeudorCellRenderer());
+        tablaDeudores.setDefaultRenderer(Double.class, new DeudorCellRenderer());
+        tablaDeudores.setDefaultRenderer(Boolean.class, new DeudorCellRenderer());
+        
+       
+        
+        //  FORZAR REPINTADO
+        tablaDeudores.repaint();
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, "Error al cargar deudores: " + ex.getMessage());
+    }
     }
 
     // ============================================================
