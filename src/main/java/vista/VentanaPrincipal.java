@@ -69,13 +69,15 @@ public class VentanaPrincipal extends JFrame {
         btnReportes = new JButton("📊 Reportes");
         btnRegistrarVenta = new JButton("💵 Registrar Venta");
         btnDeudores = new JButton("💱 Registrar/Editar Deudor");
-    btnDevolucion = new JButton("🔁 Devolución");
+    btnDevolucion = new JButton("Devolución");
         // Boton nuevo para refrescar la base de datos.
         btnRefresh = new JButton("🔄 Refresh");
 
         btnAgregar.addActionListener(e -> abrirFormularioProducto());
         btnEditar.addActionListener(e -> editarProducto());
-        btnEliminar.addActionListener(e -> eliminarProducto());
+        btnEliminar.addActionListener(e -> eliminarDeudor());
+                btnEliminar.addActionListener(e -> eliminarProducto());
+
         btnReportes.addActionListener(e -> abrirReportes());
     btnRegistrarVenta.addActionListener(e -> registrarVenta());
     btnDevolucion.addActionListener(e -> registrarDevolucion());
@@ -179,6 +181,19 @@ public class VentanaPrincipal extends JFrame {
             int id = (int) tablaProductos.getValueAt(fila, 0);
             try {
                 new ProductoDAO().eliminarProducto(id);
+                actualizarTabla();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Error al eliminar: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void eliminarDeudor() {
+        int fila = tablaDeudores.getSelectedRow();
+        if (fila >= 0) {
+            int id = (int) tablaDeudores.getValueAt(fila, 0);
+            try {
+                new DeudoresDAO().eliminar(id);
                 actualizarTabla();
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this, "Error al eliminar: " + ex.getMessage());
