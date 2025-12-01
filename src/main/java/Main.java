@@ -15,7 +15,6 @@ public class Main {
         // Inicializar la base de datos
         modelo.ConexionSQLite.inicializarBD();
         modelo.ConexionSQLiteDevolver.inicializarBD();
-        modelo.ConexionSQLiteNotificaciones.inicializarBD();
 
         // Mostrar la ventana principal
         SwingUtilities.invokeLater(() -> {
