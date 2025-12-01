@@ -110,6 +110,9 @@ public class ProductoDAO {
             // El décimo parámetro es el ID para el WHERE
             pstmt.setInt(10, p.getId());
             pstmt.executeUpdate();
+
+            Producto actualizado = buscarPorId(p.getId());
+            new NotificacionesDAO().actualizarCantidadActual(p.getId(), actualizado.getCantidad());
         }
     }
 
@@ -137,7 +140,15 @@ public class ProductoDAO {
             pstmt.setInt(2, cantidad);
             pstmt.setInt(3, idProducto);
 
-            return pstmt.executeUpdate() > 0;
+            //return pstmt.executeUpdate() > 0;
+            boolean ok = pstmt.executeUpdate() > 0;
+
+            if (ok) {
+                Producto p = buscarPorId(idProducto);
+                new NotificacionesDAO().actualizarCantidadActual(idProducto, p.getCantidad());
+            }
+
+            return ok;
         }
     }
 
@@ -183,6 +194,9 @@ public class ProductoDAO {
             }
 
             conn.commit();
+            Producto p = buscarPorId(idProducto);
+            new NotificacionesDAO().actualizarCantidadActual(idProducto, p.getCantidad());
+
             return true;
         } catch (SQLException e) {
             if (conn != null) conn.rollback();
@@ -231,6 +245,8 @@ public class ProductoDAO {
             registrarVenta(conn, venta.getProducto().getId(), venta.getCantidad());
 
             conn.commit();
+            Producto p = buscarPorId(venta.getProducto().getId());
+            new NotificacionesDAO().actualizarCantidadActual(p.getId(), p.getCantidad());
             return true;
         } catch (SQLException e) {
             if (conn != null)
