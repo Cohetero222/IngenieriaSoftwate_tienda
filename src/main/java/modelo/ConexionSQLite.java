@@ -63,7 +63,7 @@ public class ConexionSQLite {
 
             // Crear tablas
             stmt.execute(sqlProductos);
-            stmt.execute(sqlVentas);            
+            stmt.execute(sqlVentas);
 
             // Intentar añadir columna "costo"
             try {

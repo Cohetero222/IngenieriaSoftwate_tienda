@@ -45,66 +45,23 @@ public class DialogoReportes extends JDialog {
                         return;
                     }
 
-                    // Limitar a los 10 productos mas venidos durante el mes
-                    productos = productos.stream()
-                        .sorted(Comparator.comparingInt(Producto::getVentas).reversed())
-                        .limit(10).toList();
+                    // Opcional: limitar el número de barras si la lista es muy grande
+                    // productos =
+                    // productos.stream().sorted(Comparator.comparingInt(Producto::getVentas).reversed()).limit(10).toList();
 
                     // Obtiene el máximo de ventas para escalar el gráfico
                     int maxVentas = productos.stream()
                             .mapToInt(Producto::getVentas)
                             .max().orElse(1);
 
-                    int x = 60;
+                    int x = 50;
                     int barWidth = 50;
                     // base Y se define cerca de la parte inferior del panel
                     int baseY = getHeight() - 50;
 
-                    // Obtenemos el mes pasado
-                    LocalDate fechaActual = LocalDate.now();
-                    LocalDate mesPasadoDate = fechaActual.minusMonths(1);
-
-                    // Formatear el mes en español
-                    String mesPasado = mesPasadoDate.format(
-                        java.time.format.DateTimeFormatter.ofPattern("MMMM", new Locale("es", "ES"))
-                        );
-                    
-                    // Capitalizar la primera letra del mes
-                    mesPasado = mesPasado.substring(0, 1).toUpperCase() + mesPasado.substring(1);
-
-
-                    // **Dibuja el título del gráfico**
-                    g.setColor(Color.BLACK);
-                    g.setFont(new Font("Arial", Font.BOLD, 16));
-                    String titulo = "Productos Más Vendidos - " + mesPasado;
-                    int tituloWidth = g.getFontMetrics().stringWidth(titulo);
-                    g.drawString(titulo, (getWidth() - tituloWidth) / 2, 30);
-
                     // Se dibuja un eje X
                     g.setColor(Color.BLACK);
                     g.drawLine(x - 10, baseY, getWidth() - 50, baseY);
-
-                    // Se dibuja el eje Y
-                    g.drawLine(x - 10, baseY, getWidth() - 50, baseY);
-
-                    // Dibujar marcas y valores en el eje Y
-                    g.setFont(new Font("Arial", Font.PLAIN, 15));
-                    for (int i = 0; i <= 5; i++){
-                        int valor = (maxVentas * i) / 5;
-                        int yPos = baseY - (300 * i) / 5;
-
-                        // Dibuja la marca en el eje Y
-                        g.drawLine(x - 15, yPos, x - 10, yPos);
-
-                        // Dibuja el valor numérico
-                        g.drawString(String.valueOf(valor), x - 40, yPos + 5);
-                    }
-
-                    // Etiqueta para el eje Y
-                    g.setFont(new Font("Arial", Font.BOLD, 15));
-                    Graphics2D g2d = (Graphics2D) g;
-                    g2d.rotate(-Math.PI / 2);
-                    g2d.rotate(Math.PI / 2);
 
                     for (Producto p : productos) {
                         // Calcula la altura de la barra, escalando hasta un máximo de 300px
@@ -119,45 +76,7 @@ public class DialogoReportes extends JDialog {
                         g.drawRect(x, baseY - altura, barWidth, altura);
 
                         // Dibuja el nombre del producto
-                        g.setColor(Color.BLACK);
-                        g.setFont(new Font("Arial", Font.PLAIN, 11));
-
-                        String nombre = p.getNombre().trim();
-
-                        // Estrategias para nombres largos:
-
-                        if (nombre.length() > 12){
-                            // Para nombres muy largos, dividir en dos líneas
-                            int mid = nombre.length() / 2;
-                            // Encontrar el mejor punto para dividir (espacio más cercano al medio)
-                            int splitPoint = mid;
-
-                            for (int i = 0; i < mid; i++){
-                                if (mid + i < nombre.length() && nombre.charAt(mid + i) == ' '){
-                                    splitPoint = mid + i;
-                                    break;
-                                }
-                            }
-                            
-                            String line1 = nombre.substring(0, splitPoint).trim();
-                            String line2 = nombre.substring(splitPoint).trim();
-
-                            // Centrar texto debajo de la barra
-                            int textWidth1 = g.getFontMetrics().stringWidth(line1);
-                            int textWidth2 = g.getFontMetrics().stringWidth(line2);
-                    
-                            g.drawString(line1, x + (barWidth - textWidth1) / 2, baseY + 15);
-                            g.drawString(line2, x + (barWidth - textWidth2) / 2, baseY + 30);
-                        } else if (nombre.length() > 8){
-                            // Para nombres moderadamente largos
-                            g.setFont(new Font("Arial", Font.PLAIN, 11));
-                            int textWidth = g.getFontMetrics().stringWidth(nombre);
-                            g.drawString(nombre, x + (barWidth - textWidth) / 2, baseY + 15);
-                        } else {
-                            // Para nombres cortos lo centramos normalmente
-                            int textWidth = g.getFontMetrics().stringWidth(nombre);
-                            g.drawString(nombre, x + (barWidth - textWidth) / 2, baseY + 15);
-                        }
+                        g.drawString(p.getNombre(), x, baseY + 20);
 
                         // Mueve la posición X para la siguiente barra
                         x += barWidth + 20;
