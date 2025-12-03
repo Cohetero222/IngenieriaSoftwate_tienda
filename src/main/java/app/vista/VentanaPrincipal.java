@@ -64,15 +64,15 @@ public class VentanaPrincipal extends JFrame {
         // =============================
         JPanel panelBotones = new JPanel();
 
-        btnAgregar = new JButton("➕ Agregar Producto");
-        btnEditar = new JButton("✏️ Editar");
-        btnEliminar = new JButton("❌ Eliminar");
-        btnReportes = new JButton("📊 Reportes");
-        btnRegistrarVenta = new JButton("💵 Registrar Venta");
-        btnDeudores = new JButton("💱 Registrar/Editar Deudor");
-        btnDevolucion = new JButton("🔁 Devolución");
+        btnAgregar = new JButton(" Agregar Producto");
+        btnEditar = new JButton(" Editar");
+        btnEliminar = new JButton(" Eliminar");
+        btnReportes = new JButton(" Reportes");
+        btnRegistrarVenta = new JButton(" Registrar Venta");
+        btnDeudores = new JButton(" Registrar/Editar Deudor");
+        btnDevolucion = new JButton(" Devolución");
         // Boton nuevo para refrescar la base de datos.
-        btnRefresh = new JButton("🔄 Refresh");
+        btnRefresh = new JButton(" Refresh");
 
         btnAgregar.addActionListener(e -> abrirFormularioProducto());
         btnEditar.addActionListener(e -> editarProducto());
