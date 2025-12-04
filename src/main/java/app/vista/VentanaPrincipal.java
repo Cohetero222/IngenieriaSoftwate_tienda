@@ -1,11 +1,22 @@
 package app.vista;
 
+<<<<<<< HEAD
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+=======
+import app.modelo.Producto;
+import app.modelo.ProductoDAO;
+import app.modelo.Deudores;
+import app.modelo.DeudoresDAO;
+
+import javax.swing.*;
+import java.awt.*;
+>>>>>>> HU-15
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -93,7 +104,11 @@ public class VentanaPrincipal extends JFrame {
         btnRegistrarVenta.addActionListener(e -> registrarVenta());
         btnDevolucion.addActionListener(e -> registrarDevolucion());
         // Parte para refrescar.
+<<<<<<< HEAD
         btnRefresh.addActionListener(e -> reorganizarIDs());
+=======
+        btnRefresh.addActionListener(e -> actualizarTabla());
+>>>>>>> HU-15
 
         // BOTÓN PARA ABRIR FORMULARIO DE DEUDORES
         btnDeudores.addActionListener(e -> registrarDeudor());
@@ -203,10 +218,14 @@ private void reorganizarIDs() {
     // ============================================================
 
     private void registrarVenta() {
-        int fila = tablaProductos.getSelectedRow();
-        if (fila >= 0) {
-            int idProducto = (int) tablaProductos.getValueAt(fila, 0);
-            new FormularioVenta(this, idProducto).setVisible(true);
+        int[] filas = tablaProductos.getSelectedRows();
+        if (filas.length > 0) {
+            ArrayList<Integer> idsProductos = new ArrayList<>();
+                for(int fila : filas){
+                    int idProducto = (int) tablaProductos.getValueAt(fila, 0);
+                    idsProductos.add(idProducto);
+                }
+                new FormularioVenta(this, idsProductos).setVisible(true);
         } else {
             JOptionPane.showMessageDialog(this, "Seleccione un producto para registrar la venta");
         }
