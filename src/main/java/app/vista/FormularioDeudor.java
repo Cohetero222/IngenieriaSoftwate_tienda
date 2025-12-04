@@ -1,6 +1,7 @@
 package app.vista;
 
 import java.awt.GridLayout;
+<<<<<<< HEAD
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -9,6 +10,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
+=======
+import javax.swing.*;
+>>>>>>> HU-15
 import app.modelo.Deudores;
 import app.modelo.DeudoresDAO;
 

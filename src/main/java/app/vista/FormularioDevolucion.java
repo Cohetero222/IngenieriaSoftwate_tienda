@@ -1,8 +1,16 @@
 package app.vista;
 
+<<<<<<< HEAD
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+=======
+import app.modelo.Producto;
+import app.modelo.ProductoDAO;
+
+import javax.swing.*;
+import java.awt.*;
+>>>>>>> HU-15
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
 import java.util.List;

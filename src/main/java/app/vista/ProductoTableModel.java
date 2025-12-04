@@ -4,6 +4,11 @@
  */
 package app.vista;
 
+<<<<<<< HEAD
+=======
+import app.modelo.Producto;
+import javax.swing.table.AbstractTableModel;
+>>>>>>> HU-15
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 

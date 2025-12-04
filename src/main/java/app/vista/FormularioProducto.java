@@ -4,9 +4,16 @@
  */
 package app.vista;
 
+<<<<<<< HEAD
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+=======
+import app.modelo.Producto;
+import app.modelo.ProductoDAO;
+import javax.swing.*;
+import java.awt.*;
+>>>>>>> HU-15
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
 
