@@ -1,13 +1,30 @@
 package app.vista;
 
+<<<<<<< HEAD
 import javax.swing.*;
 
 import app.modelo.Producto;
 import app.modelo.ProductoDAO;
 import java.awt.*;
+=======
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+>>>>>>> 2fa701c4594d6045f48b7d94be4c00490f34b4e0
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
 import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+
+import app.modelo.Producto;
+import app.modelo.ProductoDAO;
 
 /**
  * Diálogo para registrar devoluciones de productos.

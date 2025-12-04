@@ -1,22 +1,35 @@
 package app.vista;
 
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.sql.Date;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.TextStyle;
+import java.util.Comparator; 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 
 import app.modelo.Producto;
 import app.modelo.ProductoDAO;
 import app.modelo.Venta;
 import app.modelo.VentaDAO;
-import java.awt.*;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Comparator; // Necesario para ordenar si se desea
-import java.util.HashMap;
-import java.time.LocalDate; //Para el calculo de fechas
-import java.time.format.TextStyle;
-import java.sql.Date; //Para conversion a SQL Date
-import java.util.Locale;
-import java.util.Map;
-
 public class DialogoReportes extends JDialog {
     public DialogoReportes(JFrame parent) {
 

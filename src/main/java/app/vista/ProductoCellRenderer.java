@@ -1,6 +1,6 @@
 package app.vista;
 
-import app.modelo.Producto;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.time.LocalDate;
@@ -8,6 +8,8 @@ import java.time.temporal.ChronoUnit;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
+
+import app.modelo.Producto;
 
 public class ProductoCellRenderer extends DefaultTableCellRenderer {
 

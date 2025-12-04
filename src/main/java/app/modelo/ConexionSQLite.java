@@ -78,4 +78,66 @@ public class ConexionSQLite {
             System.err.println("Error al inicializar la base de datos: " + e.getMessage());
         }
     }
+    // ======================================
+    //  MÉTODO PARA REORGANIZAR IDs
+    // ======================================
+    public static void reorganizarIDsProductos() throws SQLException {
+        Connection conn = null;
+        try {
+            conn = conectar();
+            conn.setAutoCommit(false);
+
+            // 1. Crear tabla temporal
+            String crearTemp = """
+                CREATE TEMPORARY TABLE temp_productos AS 
+                SELECT * FROM productos ORDER BY id;
+                """;
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute(crearTemp);
+            }
+
+            // 2. Eliminar todos los registros de la tabla original
+            String limpiarOriginal = "DELETE FROM productos;";
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute(limpiarOriginal);
+            }
+
+            // 3. Reinsertar con nuevos IDs secuenciales
+            String insertarNuevos = """
+                INSERT INTO productos (nombre, marca, categoria, cantidad, estado, ventas, fecha_caducidad, precio, costo)
+                SELECT nombre, marca, categoria, cantidad, estado, ventas, fecha_caducidad, precio, costo
+                FROM temp_productos ORDER BY id;
+                """;
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute(insertarNuevos);
+            }
+
+            // 4. Eliminar tabla temporal
+            String eliminarTemp = "DROP TABLE temp_productos;";
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute(eliminarTemp);
+            }
+
+            // 5. Resetear la secuencia AUTOINCREMENT
+            String resetSequence = "DELETE FROM sqlite_sequence WHERE name='productos';";
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute(resetSequence);
+            }
+
+            conn.commit();
+            System.out.println("IDs de productos reorganizados exitosamente");
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                conn.rollback();
+            }
+            throw e;
+        } finally {
+            if (conn != null) {
+                conn.setAutoCommit(true);
+                conn.close();
+            }
+        }
+    }
+
 }

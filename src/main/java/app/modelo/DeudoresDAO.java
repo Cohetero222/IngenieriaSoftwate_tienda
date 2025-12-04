@@ -1,6 +1,10 @@
 package app.modelo;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +67,29 @@ public class DeudoresDAO {
         return lista;
     }
 
+    // Buscador para deudores
+    public List<Deudores> buscarPorNombre(String nombreParcial) throws SQLException {
+        String sql = "SELECT * FROM deudores WHERE UPPER(nombre) LIKE ?";
+        List<Deudores> deudores = new ArrayList<>();
+
+        try (Connection conn = ConexionSQLiteDevolver.conectar();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // 1. Convertir el texto de búsqueda a mayúsculas y añadir comodines (%)
+            String terminoBusqueda = "%" + nombreParcial.toUpperCase() + "%";
+
+            // 2. Asignar el parámetro al PreparedStatement
+            pstmt.setString(1, terminoBusqueda);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    deudores.add(mapearDeudor(rs));
+                }
+            }
+        }
+        return deudores;
+    }
+
     // ACTUALIZAR REGISTRO
     public void actualizarDeudor(Deudores d) throws SQLException {
         String sql = """
@@ -92,6 +119,7 @@ public class DeudoresDAO {
             pstmt.executeUpdate();
         }
     }
+      
 
     // ------- MÉTODOS AUXILIARES ---------
 

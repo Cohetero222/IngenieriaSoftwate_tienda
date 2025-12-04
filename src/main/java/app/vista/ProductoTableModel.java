@@ -4,11 +4,18 @@
  */
 package app.vista;
 
+<<<<<<< HEAD
 import javax.swing.table.AbstractTableModel;
 
 import app.modelo.Producto;
+=======
+>>>>>>> 2fa701c4594d6045f48b7d94be4c00490f34b4e0
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import javax.swing.table.AbstractTableModel;
+
+import app.modelo.Producto;
 
 /**
  *

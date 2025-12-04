@@ -1,5 +1,6 @@
 package app.vista;
 
+<<<<<<< HEAD
 import javax.swing.*;
 
 import app.modelo.Deudores;
@@ -7,10 +8,31 @@ import app.modelo.DeudoresDAO;
 import app.modelo.Producto;
 import app.modelo.ProductoDAO;
 import java.awt.*;
+=======
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+>>>>>>> 2fa701c4594d6045f48b7d94be4c00490f34b4e0
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.sql.SQLException;
 import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+
+import app.modelo.ConexionSQLite;
+import app.modelo.ConexionSQLiteDevolver;
+import app.modelo.Deudores;
+import app.modelo.DeudoresDAO;
+import app.modelo.Producto;
+import app.modelo.ProductoDAO;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -31,7 +53,7 @@ public class VentanaPrincipal extends JFrame {
         JPanel panelBuscador = new JPanel(new FlowLayout(FlowLayout.CENTER));
         txtBuscador = new JTextField(25);
 
-        panelBuscador.add(new JLabel("🔎"));
+        panelBuscador.add(new JLabel(""));
         panelBuscador.add(txtBuscador);
         add(panelBuscador, BorderLayout.NORTH);
 
@@ -40,6 +62,7 @@ public class VentanaPrincipal extends JFrame {
             @Override
             public void keyReleased(KeyEvent evt) {
                 buscarProducto();
+                buscarDeudor();
             }
         });
 
@@ -63,24 +86,24 @@ public class VentanaPrincipal extends JFrame {
         // =============================
         JPanel panelBotones = new JPanel();
 
-        btnAgregar = new JButton("➕ Agregar Producto");
-        btnEditar = new JButton("✏️ Editar");
-        btnEliminar = new JButton("❌ Eliminar");
-        btnReportes = new JButton("📊 Reportes");
-        btnRegistrarVenta = new JButton("💵 Registrar Venta");
-        btnDeudores = new JButton("💱 Registrar/Editar Deudor");
-    btnDevolucion = new JButton("🔁 Devolución");
+        btnAgregar = new JButton(" Agregar Producto");
+        btnEditar = new JButton(" Editar");
+        btnEliminar = new JButton(" Eliminar");
+        btnReportes = new JButton(" Reportes");
+        btnRegistrarVenta = new JButton(" Registrar Venta");
+        btnDeudores = new JButton(" Registrar/Editar Deudor");
+        btnDevolucion = new JButton(" Devolución");
         // Boton nuevo para refrescar la base de datos.
-        btnRefresh = new JButton("🔄 Refresh");
+        btnRefresh = new JButton(" Refresh");
 
         btnAgregar.addActionListener(e -> abrirFormularioProducto());
         btnEditar.addActionListener(e -> editarProducto());
         btnEliminar.addActionListener(e -> eliminarProducto());
         btnReportes.addActionListener(e -> abrirReportes());
-    btnRegistrarVenta.addActionListener(e -> registrarVenta());
-    btnDevolucion.addActionListener(e -> registrarDevolucion());
-    // Parte para refrescar.
-    btnRefresh.addActionListener(e -> actualizarTabla());
+        btnRegistrarVenta.addActionListener(e -> registrarVenta());
+        btnDevolucion.addActionListener(e -> registrarDevolucion());
+        // Parte para refrescar.
+        btnRefresh.addActionListener(e -> reorganizarIDs());
 
         // BOTÓN PARA ABRIR FORMULARIO DE DEUDORES
         btnDeudores.addActionListener(e -> registrarDeudor());
@@ -89,9 +112,9 @@ public class VentanaPrincipal extends JFrame {
         panelBotones.add(btnEditar);
         panelBotones.add(btnEliminar);
         panelBotones.add(btnReportes);
-    panelBotones.add(btnRegistrarVenta);
-    panelBotones.add(btnDevolucion);
-    panelBotones.add(btnDeudores);
+        panelBotones.add(btnRegistrarVenta);
+        panelBotones.add(btnDevolucion);
+        panelBotones.add(btnDeudores);
         // Se agrega el boton refresh al panel.
         panelBotones.add(btnRefresh);
 
@@ -101,6 +124,53 @@ public class VentanaPrincipal extends JFrame {
         actualizarTabla();
         cargarTablaDeudores();
     }
+
+        //Método para reorganizar los ids
+private void reorganizarIDs() {
+        try {
+            // 1. Reorganizar IDs de productos
+            ConexionSQLite.reorganizarIDsProductos();
+            
+            // 2. Reorganizar IDs de deudores
+            ConexionSQLiteDevolver.reorganizarIDsDeudores();
+            
+            // 3. Mostrar confirmación
+            JOptionPane.showMessageDialog(this, 
+                "IDs reorganizados exitosamente\n" +
+                "Productos: IDs secuenciales\n" +
+                "Deudores: IDs secuenciales", 
+                "Reorganización Completada", 
+                JOptionPane.INFORMATION_MESSAGE);
+                
+            // 4. Actualizar las tablas para mostrar los nuevos IDs
+            actualizarTablaSinReorganizar();
+            
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, 
+                "Error al reorganizar IDs: " + ex.getMessage(), 
+                "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    //Método actualizado para actualizar sin reorganizar 
+    private void actualizarTablaSinReorganizar() {
+        try {
+            // Actualizar ambas tablas SIN reorganizar IDs
+            buscarProducto();
+            List<Producto> productos = new ProductoDAO().listarTodos();
+            tablaProductos.setModel(new ProductoTableModel(productos));
+            tablaProductos.setDefaultRenderer(Object.class, new ProductoCellRenderer());
+            
+            // Actualizar tabla de deudores también
+            cargarTablaDeudores();
+            
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, 
+                "Error al cargar datos: " + ex.getMessage(), 
+                "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
 
     // ============================================================
     // 📌 MÉTODOS DE DEUDORES
@@ -166,7 +236,8 @@ public class VentanaPrincipal extends JFrame {
     }
 
     private void registrarDevolucion() {
-        // Abrir formulario de devolución (permite escribir nombre o seleccionar si hay duplicados)
+        // Abrir formulario de devolución (permite escribir nombre o seleccionar si hay
+        // duplicados)
         new FormularioDevolucion(this).setVisible(true);
         // Refrescar tabla después de la posible devolución
         actualizarTabla();
@@ -198,10 +269,19 @@ public class VentanaPrincipal extends JFrame {
             }
         }
     }
+       //Método actualizar tabla original.
+    public void actualizarTabl1() {
+        actualizarTablaSinReorganizar();
+    }
 
+    //Método de actualizar tabla 2.
+    public void actualizarTabl2() {
+        actualizarTablaSinReorganizar();
+    }
     private void abrirReportes() {
         new DialogoReportes(this).setVisible(true);
     }
+ 
 
     public void actualizarTabla() {
         buscarProducto();
@@ -239,6 +319,20 @@ public class VentanaPrincipal extends JFrame {
             List<Producto> productos = texto.isEmpty() ? dao.listarTodos() : dao.buscarPorNombre(texto);
 
             tablaProductos.setModel(new ProductoTableModel(productos));
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error de búsqueda: " + ex.getMessage());
+        }
+    }
+
+    private void buscarDeudor() {
+        String texto = txtBuscador.getText().trim();
+
+        try {
+            DeudoresDAO dao = new DeudoresDAO();
+            List<Deudores> deudores = texto.isEmpty() ? dao.listarTodos() : dao.buscarPorNombre(texto);
+
+            tablaDeudores.setModel(new DeudorTableModel(deudores));
 
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Error de búsqueda: " + ex.getMessage());
