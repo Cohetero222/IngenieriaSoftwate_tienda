@@ -1,12 +1,5 @@
 package app.vista;
 
-<<<<<<< HEAD
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.sql.Date;
-=======
 import app.modelo.DetalleVenta;
 import app.modelo.Producto;
 import app.modelo.ProductoDAO;
@@ -15,56 +8,32 @@ import app.modelo.VentaDAO;
 
 import javax.swing.*;
 import java.awt.*;
->>>>>>> HU-15
+import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
-import java.util.Comparator; // Necesario para ordenar si se desea
-import java.util.HashMap;
-import java.util.List; //Para el calculo de fechas
-import java.util.Locale;
-import java.util.Map; //Para conversion a SQL Date
-
-<<<<<<< HEAD
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-
-import app.modelo.Producto;
-import app.modelo.ProductoDAO;
-import app.modelo.Venta;
-import app.modelo.VentaDAO;
-=======
->>>>>>> HU-15
+import java.util.*;
+import java.util.List;
 
 public class DialogoReportes extends JDialog {
+
     public DialogoReportes(JFrame parent) {
 
-        // Llama al constructor de JDialog: padre, título, modal (true)
         super(parent, "Reportes", true);
         setSize(800, 600);
         setLocationRelativeTo(parent);
 
         JTabbedPane pestanas = new JTabbedPane();
 
-        // 1️⃣ Pestaña: Productos más vendidos (gráfico de barras)
-        // Se crea un JPanel anónimo donde se sobrescribe paintComponent para dibujar el
-        // gráfico.
+        /* ------------------------------------------------------------
+            1) GRÁFICO DE BARRAS – Productos más vendidos
+        ------------------------------------------------------------- */
         JPanel panelVendidos = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 try {
                     ProductoDAO dao = new ProductoDAO();
-                    // Se obtienen los datos de la base de datos
                     List<Producto> productos = dao.listarTodos();
 
                     if (productos.isEmpty()) {
@@ -72,66 +41,53 @@ public class DialogoReportes extends JDialog {
                         return;
                     }
 
-                    // Opcional: limitar el número de barras si la lista es muy grande
-                    // productos =
-                    // productos.stream().sorted(Comparator.comparingInt(Producto::getVentas).reversed()).limit(10).toList();
-
-                    // Obtiene el máximo de ventas para escalar el gráfico
                     int maxVentas = productos.stream()
                             .mapToInt(Producto::getVentas)
                             .max().orElse(1);
 
                     int x = 50;
                     int barWidth = 50;
-                    // base Y se define cerca de la parte inferior del panel
                     int baseY = getHeight() - 50;
 
-                    // Se dibuja un eje X
                     g.setColor(Color.BLACK);
                     g.drawLine(x - 10, baseY, getWidth() - 50, baseY);
 
                     for (Producto p : productos) {
-                        // Calcula la altura de la barra, escalando hasta un máximo de 300px
                         int altura = (int) ((p.getVentas() / (double) maxVentas) * 300);
 
-                        // Dibuja el relleno de la barra
                         g.setColor(Color.BLUE);
                         g.fillRect(x, baseY - altura, barWidth, altura);
 
-                        // Dibuja el contorno
                         g.setColor(Color.BLACK);
                         g.drawRect(x, baseY - altura, barWidth, altura);
-
-                        // Dibuja el nombre del producto
                         g.drawString(p.getNombre(), x, baseY + 20);
 
-                        // Mueve la posición X para la siguiente barra
                         x += barWidth + 20;
                     }
+
                 } catch (SQLException e) {
                     g.drawString("Error al cargar datos: " + e.getMessage(), 50, 50);
                 }
             }
-        }; // Fin del panelVendidos
+        };
 
         pestanas.addTab("Más Vendidos", panelVendidos);
 
-        // 2️⃣ Pestaña: Estado de productos (gráfico de pastel) - Lógica ya era
-        // funcional
+
+        /* ------------------------------------------------------------
+            2) GRÁFICO DE PASTEL – Estado de productos
+        ------------------------------------------------------------- */
         JPanel panelEstados = new JPanel() {
-
             @Override
-
             protected void paintComponent(Graphics g) {
-
                 super.paintComponent(g);
 
-                /* Lógica del gráfico de pastel */
                 try {
                     ProductoDAO dao = new ProductoDAO();
                     List<Producto> productos = dao.listarTodos();
 
                     int disponibles = 0, agotados = 0, caducados = 0, descontinuados = 0;
+
                     for (Producto p : productos) {
                         switch (p.getEstado()) {
                             case "Disponible" -> disponibles++;
@@ -155,12 +111,10 @@ public class DialogoReportes extends JDialog {
                     for (int i = 0; i < valores.length; i++) {
                         int angle = (int) Math.round(360.0 * valores[i] / total);
 
-                        // Dibuja el segmento del pastel
                         g.setColor(colores[i]);
                         g.fillArc(200, 150, 300, 300, startAngle, angle);
                         startAngle += angle;
 
-                        // Dibuja la leyenda
                         g.setColor(Color.BLACK);
                         g.drawString(etiquetas[i] + ": " + valores[i], 550, 200 + i * 20);
                     }
@@ -169,197 +123,140 @@ public class DialogoReportes extends JDialog {
                     g.drawString("Error al cargar datos: " + e.getMessage(), 50, 50);
                 }
             }
-        }; // Fin del panelEstados
+        };
 
         pestanas.addTab("Estados", panelEstados);
 
 
-        /* Panel de tablas */
+        /* ------------------------------------------------------------
+            3) TABLAS DE REPORTES
+        ------------------------------------------------------------- */
         JPanel PanelTablas = new JPanel();
         PanelTablas.setLayout(new BoxLayout(PanelTablas, BoxLayout.Y_AXIS));
         PanelTablas.setBackground(Color.WHITE);
 
-        /* Tabla de los productos mas vendidos */
-        JPanel SeccionMasVendidos = new JPanel(new BorderLayout());
-        SeccionMasVendidos.setBorder(BorderFactory.createTitledBorder("Productos mas Vendidos"));
-        SeccionMasVendidos.setBackground(Color.WHITE);
-        String[] columnas1 = { "Nombre", "Cantidad Vendida" };
-        Object[][] filas1 = new Object[5][2];
-        JTable tablaMasVendidos = new JTable(filas1, columnas1);
-        /* Diseño */
-        tablaMasVendidos.setRowHeight(25);
-        tablaMasVendidos.setFont(new Font("Arial", Font.PLAIN, 14));
-        tablaMasVendidos.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        /* TABLA – MÁS VENDIDOS */
+        JPanel SeccionMasVendidos = crearPanelTabla("Productos Más Vendidos");
+        JTable tablaMasVendidos = crearTabla(5, new String[]{"Nombre", "Cantidad Vendida"});
         SeccionMasVendidos.add(new JScrollPane(tablaMasVendidos), BorderLayout.CENTER);
 
-        /* Tabla de los productos con mayor ganancia */
-        JPanel SeccionMayorGanancia = new JPanel(new BorderLayout());
-        SeccionMayorGanancia.setBorder(BorderFactory.createTitledBorder("Productos con Mayor Ganancia"));
-        SeccionMayorGanancia.setBackground(Color.WHITE);
-        String[] columnas2 = { "Nombre", "Ganancia" };
-        Object[][] filas2 = new Object[5][2];
-        /* Diseño */
-        JTable tablaMayorGanancia = new JTable(filas2, columnas2);
-        tablaMayorGanancia.setRowHeight(25);
-        tablaMayorGanancia.setFont(new Font("Arial", Font.PLAIN, 14));
-        tablaMayorGanancia.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        /* TABLA – MAYOR GANANCIA */
+        JPanel SeccionMayorGanancia = crearPanelTabla("Productos con Mayor Ganancia");
+        JTable tablaMayorGanancia = crearTabla(5, new String[]{"Nombre", "Ganancia"});
         SeccionMayorGanancia.add(new JScrollPane(tablaMayorGanancia), BorderLayout.CENTER);
 
-        /* Tabla de los productos menos vendidos */
-        JPanel SeccionMenosVendidos = new JPanel(new BorderLayout());
-        SeccionMenosVendidos.setBorder(BorderFactory.createTitledBorder("Productos menos Vendidos"));
-        SeccionMenosVendidos.setBackground(Color.WHITE);
-        String[] columnas3 = { "Nombre", "Cantidad Vendida" };
-        Object[][] filas3 = new Object[5][2];
-        JTable tablaMenosVendidos = new JTable(filas3, columnas3);
-        /* Diseño */
-        tablaMenosVendidos.setRowHeight(25);
-        tablaMenosVendidos.setFont(new Font("Arial", Font.PLAIN, 14));
-        tablaMenosVendidos.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        /* TABLA – MENOS VENDIDOS */
+        JPanel SeccionMenosVendidos = crearPanelTabla("Productos Menos Vendidos");
+        JTable tablaMenosVendidos = crearTabla(5, new String[]{"Nombre", "Cantidad Vendida"});
         SeccionMenosVendidos.add(new JScrollPane(tablaMenosVendidos), BorderLayout.CENTER);
 
-        /* Añadir las secciones */
         PanelTablas.add(SeccionMasVendidos);
         PanelTablas.add(Box.createVerticalStrut(20));
         PanelTablas.add(SeccionMayorGanancia);
         PanelTablas.add(Box.createVerticalStrut(20));
         PanelTablas.add(SeccionMenosVendidos);
-        
-        /*Llenado de las tablas*/
+
+
+        /* ------------------------------------------------------------
+            CÁLCULO Y LLENADO DE TABLAS
+        ------------------------------------------------------------- */
+
         try {
+            LocalDate inicioMes = LocalDate.now().minusMonths(1).withDayOfMonth(1);
+            LocalDate finMes = inicioMes.withDayOfMonth(inicioMes.lengthOfMonth());
 
-            /*Calculo para el mes pasado */
-         
-            LocalDate InicioMesPasado = LocalDate.now().minusMonths(1).withDayOfMonth(1);
-            LocalDate FinMesPasado = InicioMesPasado.withDayOfMonth(InicioMesPasado.lengthOfMonth());
+            Date inicioSQL = Date.valueOf(inicioMes);
+            Date finSQL = Date.valueOf(finMes);
 
-            Date FechaInicioSQL = Date.valueOf(InicioMesPasado);
-            Date FechaFinSQL = Date.valueOf(FinMesPasado);
-
-            String Mes = InicioMesPasado.getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "ES"));
-            JLabel EtiquetaMes = new JLabel("Reporte de: " + Mes);
+            JLabel EtiquetaMes = new JLabel("Reporte del mes: " +
+                    inicioMes.getMonth().getDisplayName(TextStyle.FULL, new Locale("es", "ES")));
             EtiquetaMes.setFont(new Font("Arial", Font.BOLD, 16));
             PanelTablas.add(EtiquetaMes, 0);
 
-            //VentaDAO vdao = new VentaDAO();
-            List<Venta> ventasMes = VentaDAO.obtenerVentasPorFecha(FechaInicioSQL, FechaFinSQL);
+            List<Venta> ventasMes = VentaDAO.obtenerVentasPorFecha(inicioSQL, finSQL);
 
-            /*Si no hay ventas: */
-            if(ventasMes.isEmpty()){
+            if (ventasMes.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "No hay ventas en el mes pasado.");
-                return;
-            }
-             
+            } else {
 
+                Map<Integer, Integer> CantVendidas = new HashMap<>();
+                Map<Integer, Double> Ganancias = new HashMap<>();
+                Map<Integer, Producto> Productos = new HashMap<>();
 
-/*Prueba */
-System.out.println("VENTAS ENCONTRADAS: " + ventasMes.size());
-for (Venta v : ventasMes) {
-    System.out.println("Venta ID=" + v.getId() + " Fecha=" + v.getFecha());
-}
+                for (Venta v : ventasMes) {
+                    for (DetalleVenta dv : v.getVentaDetalles()) {
+                        int id = dv.getProducto().getId();
+                        Productos.put(id, dv.getProducto());
 
+                        CantVendidas.put(id, CantVendidas.getOrDefault(id, 0) + dv.getCantidad());
 
-             /*Agrupacion por id */
-
-             Map<Integer, Integer> CantVendidas = new HashMap<>();
-             Map<Integer, Double> GananciasProducto = new HashMap<>();
-             Map<Integer, Producto> ProductosPorID = new HashMap<>();
-
-            for(Venta v: ventasMes){
-                System.out.println("DETALLES DE LA VENTA " + v.getId() + ": " + v.getVentaDetalles().size());
-
-                for(DetalleVenta dv : v.getVentaDetalles()){
-                    int id = dv.getProducto().getId();
-                    ProductosPorID.put(id, dv.getProducto());
-
-                    /*Cantidad vendida */
-                    CantVendidas.put(id, CantVendidas.getOrDefault(id, 0) + dv.getCantidad());
-
-                    /*Calcular ganancia */
-                    double Ganancia = dv.getCantidad() * dv.getPrecioUnitario();
-                    GananciasProducto.put(id, GananciasProducto.getOrDefault(id, 0.0) + Ganancia);
+                        double ganancia = dv.getCantidad() * dv.getPrecioUnitario();
+                        Ganancias.put(id, Ganancias.getOrDefault(id, 0.0) + ganancia);
+                    }
                 }
+
+                List<Integer> MasVendidos = CantVendidas.keySet().stream()
+                        .sorted((a, b) -> CantVendidas.get(b) - CantVendidas.get(a))
+                        .limit(5).toList();
+
+                List<Integer> MenosVendidos = CantVendidas.keySet().stream()
+                        .sorted(Comparator.comparingInt(CantVendidas::get))
+                        .limit(5).toList();
+
+                List<Integer> MayorGanancia = Ganancias.keySet().stream()
+                        .sorted((a, b) -> Double.compare(Ganancias.get(b), Ganancias.get(a)))
+                        .limit(5).toList();
+
+                llenar(tablaMasVendidos, MasVendidos, CantVendidas, Productos);
+                llenar(tablaMenosVendidos, MenosVendidos, CantVendidas, Productos);
+                llenarGanancias(tablaMayorGanancia, MayorGanancia, Ganancias, Productos);
             }
-
-            /*Creacion de listas */
-
-            List<Integer> MasVendidos = CantVendidas.keySet().stream()
-                    .sorted((id1, id2) -> Integer.compare(CantVendidas.get(id2), CantVendidas.get(id1)))
-                    .limit(5)
-                    .toList();
-
-            List<Integer> MenosVendidos =  CantVendidas.keySet().stream()
-                    .sorted(Comparator.comparingInt(CantVendidas::get))
-                    .limit(5)
-                    .toList();
-
-            List<Integer> MayorGanancia = GananciasProducto.keySet().stream()
-                    .sorted((id1, id2) -> Double.compare(GananciasProducto.get(id2), GananciasProducto.get(id1)))
-                    .limit(5)
-                    .toList();
-            
-            /* Llenar tabla de más vendidos*/
-            for (int i = 0; i < MasVendidos.size(); i++) {
-                int id = MasVendidos.get(i);
-                Producto p = ProductosPorID.get(id);
-                tablaMasVendidos.setValueAt(p.getNombre(), i, 0);
-                tablaMasVendidos.setValueAt(CantVendidas.get(id), i, 1);
-            }
-
-            // Verificar filas vacías
-for (int i = 0; i < tablaMasVendidos.getRowCount(); i++) {
-    if (filaEstaVacia(tablaMasVendidos, i)) {
-        System.out.println("Fila vacía en tablaMasVendidos: " + i);
-    }
-}
-
-
-            /*Llenar tablas de menos vendidos */
-            for (int i = 0; i < MenosVendidos.size(); i++) {
-                int id = MenosVendidos.get(i);
-                Producto p = ProductosPorID.get(id);
-                tablaMenosVendidos.setValueAt(p.getNombre(), i, 0);
-                tablaMenosVendidos.setValueAt(CantVendidas.get(id), i, 1);
-            }
-for (int i = 0; i < tablaMenosVendidos.getRowCount(); i++) {
-    if (filaEstaVacia(tablaMenosVendidos, i)) {
-        System.out.println("Fila vacía en tablaMenosVendidos: " + i);
-    }
-}
-
-            /*Llenar tabla con mas ganancia */    
-            for (int i = 0; i < MayorGanancia.size(); i++) {    
-                int id = MayorGanancia.get(i);
-                Producto p = ProductosPorID.get(id);
-                tablaMayorGanancia.setValueAt(p.getNombre(), i, 0);
-                tablaMayorGanancia.setValueAt(GananciasProducto.get(id), i, 1);
-            }
-for (int i = 0; i < tablaMayorGanancia.getRowCount(); i++) {
-    if (filaEstaVacia(tablaMayorGanancia, i)) {
-        System.out.println("Fila vacía en tablaMayorGanancia: " + i);
-    }
-}
-
-            
 
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error al cargar datos en tablas: " + e.getMessage(),
+            JOptionPane.showMessageDialog(this, "Error al cargar datos: " + e.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
-        // Fin del panel tablas
 
         pestanas.addTab("Tablas", PanelTablas);
 
         add(pestanas);
     }
-private boolean filaEstaVacia(JTable tabla, int fila) {
-    for (int c = 0; c < tabla.getColumnCount(); c++) {
-        Object v = tabla.getValueAt(fila, c);
-        if (v != null && !v.toString().trim().isEmpty()) {
-            return false;
+
+    /* ------------------------------------------------------------
+            MÉTODOS AUXILIARES
+    ------------------------------------------------------------- */
+    private JPanel crearPanelTabla(String titulo) {
+        JPanel p = new JPanel(new BorderLayout());
+        p.setBackground(Color.WHITE);
+        p.setBorder(BorderFactory.createTitledBorder(titulo));
+        return p;
+    }
+
+    private JTable crearTabla(int filas, String[] columnas) {
+        JTable t = new JTable(new Object[filas][columnas.length], columnas);
+        t.setRowHeight(25);
+        t.setFont(new Font("Arial", Font.PLAIN, 14));
+        t.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+        return t;
+    }
+
+    private void llenar(JTable tabla, List<Integer> lista, Map<Integer, Integer> cant,
+                        Map<Integer, Producto> productos) {
+
+        for (int i = 0; i < lista.size(); i++) {
+            int id = lista.get(i);
+            tabla.setValueAt(productos.get(id).getNombre(), i, 0);
+            tabla.setValueAt(cant.get(id), i, 1);
         }
     }
-    return true;
-}
 
+    private void llenarGanancias(JTable tabla, List<Integer> lista, Map<Integer, Double> gan,
+                                 Map<Integer, Producto> productos) {
+
+        for (int i = 0; i < lista.size(); i++) {
+            int id = lista.get(i);
+            tabla.setValueAt(productos.get(id).getNombre(), i, 0);
+            tabla.setValueAt(gan.get(id), i, 1);
+        }
+    }
 }
