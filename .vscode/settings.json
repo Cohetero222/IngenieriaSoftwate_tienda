@@ -1,0 +1,11 @@
+<<<<<<< HEAD
+{
+    "java.configuration.updateBuildConfiguration": "disabled"
+}
+=======
+{
+    "jdk.advanced.disable.nbjavac": false,
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.updateBuildConfiguration": "interactive"
+}
+>>>>>>> HU-15
