@@ -1,0 +1,21 @@
+# Java / Maven / IntelliJ / VSCode
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# SQLite - NO debe subirse
+*.db
+
+# VSCode local settings
+.vscode/
+
+# Archivos temporales
+*.tmp
+*.bak
