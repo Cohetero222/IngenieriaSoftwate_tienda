@@ -67,16 +67,11 @@ public class FormularioDeudor extends JDialog {
         txtCosto = new JTextField(String.valueOf(deudor.getCosto()));
         add(txtCosto);
 
-<<<<<<< HEAD
         // Nuevo apartado pagado 
         add(new JLabel("Pagado:"));
         chkPagado = new JCheckBox("¿Ya pagó?");
         chkPagado.setSelected(deudor.isPagado());
         add(chkPagado);
-=======
-        btnGuardar = new JButton("Guardar");
-        btnCancelar = new JButton("Cancelar");
->>>>>>> 18c8b060f94ec79f0a489b0db5631e783b72d0a4
 
        // Panel para botones alineados a la derecha
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
