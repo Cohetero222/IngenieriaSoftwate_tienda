@@ -4,115 +4,194 @@
  */
 package app.vista;
 
-<<<<<<< HEAD
 import javax.swing.*;
-=======
-import java.awt.GridLayout;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
->>>>>>> 2fa701c4594d6045f48b7d94be4c00490f34b4e0
+import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 
 import app.modelo.Producto;
 import app.modelo.ProductoDAO;
+import app.modelo.DetalleVenta;
 import app.modelo.Venta;
 import app.modelo.VentaDAO;
-<<<<<<< HEAD
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.time.LocalDateTime;
-=======
->>>>>>> 2fa701c4594d6045f48b7d94be4c00490f34b4e0
+
 /**
  *
  * @author omarf
  */
 public class FormularioVenta extends JDialog {
-    private JTextField txtNombreProducto, txtPrecioUnitario, txtCantidad, txtTotal;
-    private JButton btnRegistrar, btnCancelar;
-    private Producto producto;
 
-    public FormularioVenta(JFrame parent, int idProducto) {
+    private ArrayList<Producto> productos;
+    private ArrayList<JTextField> camposCantidades;
+    private ArrayList<JTextField> camposTotales;
+    private JTextField txtTotalGeneral;
+
+    private JButton btnRegistrar, btnCancelar;
+
+    public FormularioVenta(JFrame parent, ArrayList<Integer> idsProductos) {
         super(parent, "Registrar Venta", true);
-        setSize(400, 300);
+        setPreferredSize(new Dimension(450, 380));
         setLocationRelativeTo(parent);
-        setLayout(new GridLayout(6, 2, 10, 10));
+
+        productos = new ArrayList<>();
+        camposCantidades = new ArrayList<>();
+        camposTotales = new ArrayList<>();
+
+        setLayout(new BorderLayout());
+        JPanel panelCentral = new JPanel(new GridLayout(idsProductos.size() + 2, 3, 10, 10));
+
+        panelCentral.add(new JLabel("Producto"));
+        panelCentral.add(new JLabel("Cantidad"));
+        panelCentral.add(new JLabel("Total"));
 
         try {
-            this.producto = new ProductoDAO().buscarPorId(idProducto); // Asumes que tienes este método
+            ProductoDAO productoDAO = new ProductoDAO();
+
+            for (Integer id : idsProductos) {
+                Producto producto = productoDAO.buscarPorId(id);
+                productos.add(producto);
+
+                panelCentral.add(new JLabel(producto.getNombre()));
+
+                JTextField txtCantidad = new JTextField();
+                camposCantidades.add(txtCantidad);
+                panelCentral.add(txtCantidad);
+
+                JTextField txtTotal = new JTextField();
+                txtTotal.setEditable(false);
+                camposTotales.add(txtTotal);
+                panelCentral.add(txtTotal);
+
+                // Recalcular total
+                txtCantidad.addKeyListener(new KeyAdapter() {
+                    @Override
+                    public void keyReleased(KeyEvent e) {
+                        String value = txtCantidad.getText().trim();
+
+                        if (value.isEmpty()) {
+                            txtTotal.setText("0.00");
+                            txtTotal.setForeground(Color.BLACK);
+                            actualizarTotalGeneral();
+                            return;
+                        }
+
+                        try {
+                            int cantidad = Integer.parseInt(value);
+
+                            if (cantidad < 0) {
+                                txtTotal.setText("ERROR");
+                                txtTotal.setForeground(Color.RED);
+                                actualizarTotalGeneral();
+                                return;
+                            }
+
+                            double total = cantidad * producto.getPrecio();
+                            txtTotal.setForeground(Color.BLACK);
+                            txtTotal.setText(String.format("%.2f", total));
+
+                        } catch (NumberFormatException ex) {
+                            txtTotal.setText("ERROR");
+                            txtTotal.setForeground(Color.RED);
+                        }
+
+                        actualizarTotalGeneral();
+                    }
+                });
+            }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al obtener producto: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Error al obtener productos: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
             dispose();
             return;
         }
 
-        // Campos
-        add(new JLabel("Producto:"));
-        txtNombreProducto = new JTextField(producto.getNombre());
-        txtNombreProducto.setEditable(false);
-        add(txtNombreProducto);
+        panelCentral.add(new JLabel("Total General: "));
+        panelCentral.add(new JLabel(""));
+        txtTotalGeneral = new JTextField();
+        txtTotalGeneral.setEditable(false);
+        panelCentral.add(txtTotalGeneral);
 
-        add(new JLabel("Precio Unitario:"));
-        txtPrecioUnitario = new JTextField(String.valueOf(producto.getPrecio()));
-        txtPrecioUnitario.setEditable(false);
-        add(txtPrecioUnitario);
-
-        add(new JLabel("Cantidad:"));
-        txtCantidad = new JTextField();
-        add(txtCantidad);
-
-        add(new JLabel("Total:"));
-        txtTotal = new JTextField();
-        txtTotal.setEditable(false);
-        add(txtTotal);
+        JScrollPane scroll = new JScrollPane(panelCentral);
+        add(scroll, BorderLayout.CENTER);
 
         // Botones
-        btnRegistrar = new JButton("✅ Registrar");
-        btnCancelar = new JButton("❌ Cancelar");
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        btnRegistrar = new JButton("Guardar");
+        btnCancelar = new JButton("Cancelar");
 
-        add(btnRegistrar);
-        add(btnCancelar);
-
-        // Eventos
-        txtCantidad.addActionListener(e -> calcularTotal());
-        txtCantidad.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                calcularTotal();
-            }
-        });
+        panelBotones.add(btnRegistrar);
+        panelBotones.add(btnCancelar);
+        add(panelBotones, BorderLayout.SOUTH);
 
         btnRegistrar.addActionListener(e -> registrarVenta());
         btnCancelar.addActionListener(e -> dispose());
+
+        pack();
     }
 
-    private void calcularTotal() {
-        try {
-            int cantidad = Integer.parseInt(txtCantidad.getText());
-            double total = cantidad * producto.getPrecio();
-            txtTotal.setText(String.format("%.2f", total));
-        } catch (NumberFormatException e) {
-            txtTotal.setText("");
+    private double actualizarTotalGeneral() {
+        double total = 0.0;
+
+        for (JTextField txtTotal : camposTotales) {
+            String text = txtTotal.getText().trim();
+            if (!text.isEmpty() && !text.equals("ERROR")) {
+                try {
+                    total += Double.parseDouble(text.replace(",", "."));
+                } catch (NumberFormatException ignored) {}
+            }
         }
+
+        txtTotalGeneral.setText(String.format("%.2f", total));
+        return total;
     }
 
     private void registrarVenta() {
+
+        // Evitar registrar si hay errores
+        for (JTextField t : camposTotales) {
+            if (t.getText().equals("ERROR")) {
+                JOptionPane.showMessageDialog(this,
+                        "No se puede registrar la venta: hay cantidades inválidas.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
         try {
-            int cantidad = Integer.parseInt(txtCantidad.getText());
-            if (cantidad <= 0) throw new NumberFormatException();
+            Venta venta = new Venta();
 
-            Venta venta = new Venta(producto, cantidad);
-            new VentaDAO().guardarVenta(venta); // Necesitas implementar esto
+            for (int i = 0; i < productos.size(); i++) {
+                Producto producto = productos.get(i);
 
-            JOptionPane.showMessageDialog(this, "Venta registrada:\n" + venta);
+                String tx = camposCantidades.get(i).getText().trim();
+                if (tx.isEmpty()) continue;
+
+                int cantidad = Integer.parseInt(tx);
+                if (cantidad <= 0) continue;
+
+                venta.AgregarDetalle(new DetalleVenta(
+                        producto,
+                        cantidad,
+                        producto.getPrecio()
+                ));
+            }
+
+            new VentaDAO().guardarVenta(venta);
+
+            JOptionPane.showMessageDialog(this,
+                    "Venta registrada exitosamente.");
+
             dispose();
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Ingrese una cantidad válida", "Error", JOptionPane.ERROR_MESSAGE);
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al guardar la venta: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Error al registrar la venta: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 }

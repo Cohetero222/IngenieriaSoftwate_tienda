@@ -1,21 +1,12 @@
 package app.vista;
 
-<<<<<<< HEAD
-import javax.swing.*;
-
-import app.modelo.Deudores;
-import app.modelo.DeudoresDAO;
-import app.modelo.Producto;
-import app.modelo.ProductoDAO;
-import java.awt.*;
-=======
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
->>>>>>> 2fa701c4594d6045f48b7d94be4c00490f34b4e0
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -93,7 +84,6 @@ public class VentanaPrincipal extends JFrame {
         btnRegistrarVenta = new JButton(" Registrar Venta");
         btnDeudores = new JButton(" Registrar/Editar Deudor");
         btnDevolucion = new JButton(" Devolución");
-        // Boton nuevo para refrescar la base de datos.
         btnRefresh = new JButton(" Refresh");
 
         btnAgregar.addActionListener(e -> abrirFormularioProducto());
@@ -125,8 +115,10 @@ public class VentanaPrincipal extends JFrame {
         cargarTablaDeudores();
     }
 
-        //Método para reorganizar los ids
-private void reorganizarIDs() {
+    // =============================
+    // REORGANIZAR IDs
+    // =============================
+    private void reorganizarIDs() {
         try {
             // 1. Reorganizar IDs de productos
             ConexionSQLite.reorganizarIDsProductos();
@@ -152,7 +144,7 @@ private void reorganizarIDs() {
         }
     }
 
-    //Método actualizado para actualizar sin reorganizar 
+    // Método actualizado para actualizar sin reorganizar 
     private void actualizarTablaSinReorganizar() {
         try {
             // Actualizar ambas tablas SIN reorganizar IDs
@@ -170,7 +162,6 @@ private void reorganizarIDs() {
                 "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
 
     // ============================================================
     // 📌 MÉTODOS DE DEUDORES
@@ -203,22 +194,20 @@ private void reorganizarIDs() {
         try {
             List<Deudores> lista = new DeudoresDAO().listarTodos();
             tablaDeudores.setModel(new DeudorTableModel(lista));
-             //FORZAR LA CONFIGURACIÓN DEL RENDERER
-        tablaDeudores.setDefaultRenderer(Object.class, new DeudorCellRenderer());
-        
-        //  OPCIONAL: Aplicar también a tipos específicos
-        tablaDeudores.setDefaultRenderer(String.class, new DeudorCellRenderer());
-        tablaDeudores.setDefaultRenderer(Integer.class, new DeudorCellRenderer());
-        tablaDeudores.setDefaultRenderer(Double.class, new DeudorCellRenderer());
-        tablaDeudores.setDefaultRenderer(Boolean.class, new DeudorCellRenderer());
-        
-       
-        
-        //  FORZAR REPINTADO
-        tablaDeudores.repaint();
-    } catch (Exception ex) {
-        JOptionPane.showMessageDialog(this, "Error al cargar deudores: " + ex.getMessage());
-    }
+            // FORZAR LA CONFIGURACIÓN DEL RENDERER
+            tablaDeudores.setDefaultRenderer(Object.class, new DeudorCellRenderer());
+            
+            // OPCIONAL: Aplicar también a tipos específicos
+            tablaDeudores.setDefaultRenderer(String.class, new DeudorCellRenderer());
+            tablaDeudores.setDefaultRenderer(Integer.class, new DeudorCellRenderer());
+            tablaDeudores.setDefaultRenderer(Double.class, new DeudorCellRenderer());
+            tablaDeudores.setDefaultRenderer(Boolean.class, new DeudorCellRenderer());
+            
+            // FORZAR REPINTADO
+            tablaDeudores.repaint();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error al cargar deudores: " + ex.getMessage());
+        }
     }
 
     // ============================================================
@@ -226,14 +215,17 @@ private void reorganizarIDs() {
     // ============================================================
 
     private void registrarVenta() {
-        int fila = tablaProductos.getSelectedRow();
-        if (fila >= 0) {
-            int idProducto = (int) tablaProductos.getValueAt(fila, 0);
-            new FormularioVenta(this, idProducto).setVisible(true);
+        int[] filas = tablaProductos.getSelectedRows();
+        if (filas.length > 0) {
+            ArrayList<Integer> ids = new ArrayList<>();
+            for (int f : filas) ids.add((int) tablaProductos.getValueAt(f, 0));
+
+            new FormularioVenta(this, ids).setVisible(true);
         } else {
-            JOptionPane.showMessageDialog(this, "Seleccione un producto para registrar la venta");
+            JOptionPane.showMessageDialog(this, "Seleccione uno o más productos.");
         }
     }
+
 
     private void registrarDevolucion() {
         // Abrir formulario de devolución (permite escribir nombre o seleccionar si hay
@@ -269,19 +261,20 @@ private void reorganizarIDs() {
             }
         }
     }
-       //Método actualizar tabla original.
+    
+    // Método actualizar tabla original.
     public void actualizarTabl1() {
         actualizarTablaSinReorganizar();
     }
 
-    //Método de actualizar tabla 2.
+    // Método de actualizar tabla 2.
     public void actualizarTabl2() {
         actualizarTablaSinReorganizar();
     }
+    
     private void abrirReportes() {
         new DialogoReportes(this).setVisible(true);
     }
- 
 
     public void actualizarTabla() {
         buscarProducto();

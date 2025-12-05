@@ -4,17 +4,9 @@
  */
 package app.vista;
 
-<<<<<<< HEAD
-import javax.swing.*;
-
-import app.modelo.Producto;
-import app.modelo.ProductoDAO;
-import java.awt.*;
-=======
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
->>>>>>> 2fa701c4594d6045f48b7d94be4c00490f34b4e0
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
 
@@ -219,7 +211,7 @@ public class FormularioProducto extends JDialog {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    
     private void registrarVenta(JLabel lblTotal) {
         int cantidad = (int) spCantidadVenta.getValue();
 

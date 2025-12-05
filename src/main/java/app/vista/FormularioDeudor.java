@@ -1,24 +1,20 @@
 package app.vista;
 
-import java.awt.GridLayout;
-<<<<<<< HEAD
-import javax.swing.*;
-import java.awt.FlowLayout;
-import app.modelo.Deudores;
-import app.modelo.DeudoresDAO;
 import java.awt.BorderLayout;
-=======
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import app.modelo.Deudores;
 import app.modelo.DeudoresDAO;
->>>>>>> 2fa701c4594d6045f48b7d94be4c00490f34b4e0
 
 public class FormularioDeudor extends JDialog {
 
@@ -30,7 +26,7 @@ public class FormularioDeudor extends JDialog {
 
     private Deudores deudor;
 
-    // 👉 CONSTRUCTOR PRINCIPAL (editar o nuevo)
+    // ?? CONSTRUCTOR PRINCIPAL (editar o nuevo)
     public FormularioDeudor(JFrame parent, Deudores d) {
         super(parent, "Registrar Deudor", true);
 
