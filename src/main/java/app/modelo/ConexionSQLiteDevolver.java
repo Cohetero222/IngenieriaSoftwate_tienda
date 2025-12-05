@@ -43,7 +43,6 @@ public class ConexionSQLiteDevolver {
 
         try (Connection conn = conectar();
              Statement stmt = conn.createStatement()) {
-
             stmt.execute(sqlDeudores);
 
         } catch (SQLException e) {

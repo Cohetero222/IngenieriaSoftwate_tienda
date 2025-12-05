@@ -1,13 +1,7 @@
 package app.vista;
 
 import java.awt.GridLayout;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 import app.modelo.Deudores;
 import app.modelo.DeudoresDAO;
@@ -59,8 +53,9 @@ public class FormularioDeudor extends JDialog {
         txtCosto = new JTextField(String.valueOf(deudor.getCosto()));
         add(txtCosto);
 
-        btnGuardar = new JButton("Guardar");
-        btnCancelar = new JButton("Cancelar");
+        // Puedes usar los nombres que tú prefieres, mantengo los tuyos:
+        btnGuardar = new JButton(" Guardar");
+        btnCancelar = new JButton(" Cancelar");
 
         add(btnGuardar);
         add(btnCancelar);

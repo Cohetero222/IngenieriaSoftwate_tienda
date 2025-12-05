@@ -1,23 +1,13 @@
 package app.vista;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Dimension;
+import app.modelo.Producto;
+import app.modelo.ProductoDAO;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
 import java.util.List;
-
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-
-import app.modelo.Producto;
-import app.modelo.ProductoDAO;
 
 /**
  * Diálogo para registrar devoluciones de productos.
@@ -48,7 +38,7 @@ public class FormularioDevolucion extends JDialog {
         txtNombre = new JTextField();
         c.gridx = 1; c.gridy = 0; c.gridwidth = 2; add(txtNombre, c);
 
-        btnBuscar = new JButton("Buscar");
+        btnBuscar = new JButton(" Buscar");
         c.gridx = 3; c.gridy = 0; c.gridwidth = 1; add(btnBuscar, c);
 
         c.gridx = 0; c.gridy = 1; add(new JLabel("Coincidencias:"), c);
@@ -60,22 +50,11 @@ public class FormularioDevolucion extends JDialog {
         txtCantidad = new JTextField();
         c.gridx = 1; c.gridy = 2; c.gridwidth = 3; add(txtCantidad, c);
 
-        btnDevolver = new JButton("Guardar");
-        btnCancelar = new JButton("Cancelar");
+        btnDevolver = new JButton(" Devolver");
+        btnCancelar = new JButton(" Cancelar");
 
-        // Tamaño personalizado (tu cambio)
-        btnDevolver.setPreferredSize(new Dimension(110, 30));
-        btnCancelar.setPreferredSize(new Dimension(110, 30));
-
-        // Botones alineados a la derecha
-        c.gridwidth = 1;
-        c.anchor = GridBagConstraints.EAST;
-
-        c.gridx = 2; c.gridy = 3;
-        add(btnDevolver, c);
-
-        c.gridx = 3; c.gridy = 3;
-        add(btnCancelar, c);
+        c.gridx = 1; c.gridy = 3; c.gridwidth = 1; add(btnDevolver, c);
+        c.gridx = 2; c.gridy = 3; add(btnCancelar, c);
 
         // Acciones
         btnBuscar.addActionListener(this::buscarProductos);
@@ -107,6 +86,7 @@ public class FormularioDevolucion extends JDialog {
                 comboMatches.addItem(label);
             }
 
+            // Seleccionar el primer elemento por defecto
             comboMatches.setSelectedIndex(0);
             seleccionado = matches.get(0);
 
@@ -141,18 +121,16 @@ public class FormularioDevolucion extends JDialog {
             boolean ok = new ProductoDAO().devolverProducto(seleccionado.getId(), cantidad);
             if (ok) {
                 JOptionPane.showMessageDialog(this, "Devolución registrada correctamente.");
-
+                // Refrescar la tabla principal si es VentanaPrincipal
                 if (parent instanceof VentanaPrincipal) {
                     ((VentanaPrincipal) parent).actualizarTabla();
                 }
-
                 dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "No se pudo registrar la devolución.");
             }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error al procesar la devolución: " + ex.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error al procesar la devolución: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
