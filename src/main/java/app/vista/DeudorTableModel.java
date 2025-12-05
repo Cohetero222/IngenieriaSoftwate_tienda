@@ -1,6 +1,7 @@
 package app.vista;
 
 import java.util.List;
+
 import javax.swing.table.AbstractTableModel;
 
 import app.modelo.Deudores;

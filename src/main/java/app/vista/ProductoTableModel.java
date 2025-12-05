@@ -1,22 +1,27 @@
 /*
+src/main/java/app/vista
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package app.vista;
 
-import app.modelo.Producto;
-import javax.swing.table.AbstractTableModel;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import javax.swing.table.AbstractTableModel;
+
+import app.modelo.Producto;
 
 /**
  *
  * @author omarf
  */
 public class ProductoTableModel extends AbstractTableModel {
-    private final String[] columnas = { "ID", "Nombre", "Marca", "Categoría", "Cantidad", "Precio", "Costo", "Estado",
-            "Ventas",
-            "Caducidad" };
+    private final String[] columnas = { 
+        "ID", "Nombre", "Marca", "Categoría", "Cantidad", 
+        "Precio", "Costo", "Estado", "Ventas", "Caducidad" 
+    };
+
     private List<Producto> productos;
 
     public ProductoTableModel() {
@@ -55,15 +60,15 @@ public class ProductoTableModel extends AbstractTableModel {
             case 6 -> String.format("$%.2f", p.getCosto());
             case 7 -> p.getEstado();
             case 8 -> p.getVentas();
-            case 9 ->
-                p.getFechaCaducidad() != null ? p.getFechaCaducidad().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+            case 9 -> p.getFechaCaducidad() != null
+                        ? p.getFechaCaducidad().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                         : "N/A";
             default -> null;
         };
     }
 
     public Producto getProductoEn(int fila) {
-        if(fila >=0 && fila < productos.size()){
+        if (fila >= 0 && fila < productos.size()) {
             return productos.get(fila);
         }
         return null;

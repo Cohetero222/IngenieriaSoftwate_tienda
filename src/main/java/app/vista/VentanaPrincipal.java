@@ -1,21 +1,36 @@
 package app.vista;
 
-import app.modelo.Producto;
-import app.modelo.ProductoDAO;
-import app.modelo.ConexionSQLiteNotificaciones;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.Component;
+import java.awt.Color;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.table.DefaultTableCellRenderer;
+
+//import org.springframework.stereotype.Component;
+
+import app.modelo.ConexionSQLite;
+import app.modelo.ConexionSQLiteDevolver;
 import app.modelo.Deudores;
 import app.modelo.DeudoresDAO;
 import app.modelo.Notificaciones;
 import app.modelo.NotificacionesDAO;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-
-import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.sql.SQLException;
-import java.util.List;
+import app.modelo.Producto;
+import app.modelo.ProductoDAO;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -47,6 +62,7 @@ public class VentanaPrincipal extends JFrame {
             @Override
             public void keyReleased(KeyEvent evt) {
                 buscarProducto();
+                buscarDeudor();
             }
         });
 
@@ -81,20 +97,24 @@ public class VentanaPrincipal extends JFrame {
         btnRegistrarVenta = new JButton(" Registrar Venta");
         btnDeudores = new JButton(" Registrar/Editar Deudor");
         btnDevolucion = new JButton(" Devolución");
-        // Boton nuevo para refrescar la base de datos.
         btnRefresh = new JButton(" Refresh");
 
         btnAgregar.addActionListener(e -> abrirFormularioProducto());
         btnEditar.addActionListener(e -> editarProducto());
-        btnEliminar.addActionListener(e -> eliminarProducto());
+
+        btnEliminar.addActionListener(e -> {
+            int tab = tabs.getSelectedIndex();
+            if (tab == 0) eliminarProducto();
+            else eliminarDeudor();
+        });
+
         btnReportes.addActionListener(e -> abrirReportes());
         btnRegistrarVenta.addActionListener(e -> registrarVenta());
         btnDevolucion.addActionListener(e -> registrarDevolucion());
-        // Parte para refrescar.
-        btnRefresh.addActionListener(e -> actualizarTabla());
-
-        // BOTÓN PARA ABRIR FORMULARIO DE DEUDORES
         btnDeudores.addActionListener(e -> registrarDeudor());
+
+        // Refresh reorganiza IDs
+        btnRefresh.addActionListener(e -> reorganizarIDs());
 
         panelBotones.add(btnAgregar);
         panelBotones.add(btnEditar);
@@ -103,7 +123,6 @@ public class VentanaPrincipal extends JFrame {
         panelBotones.add(btnRegistrarVenta);
         panelBotones.add(btnDevolucion);
         panelBotones.add(btnDeudores);
-        // Se agrega el boton refresh al panel.
         panelBotones.add(btnRefresh);
 
         add(panelBotones, BorderLayout.SOUTH);
@@ -115,31 +134,66 @@ public class VentanaPrincipal extends JFrame {
         cargarNotificaciones();
     }
 
-    // ============================================================
-    // 📌 MÉTODOS DE DEUDORES
-    // ============================================================
+    // =============================
+    // REORGANIZAR IDs
+    // =============================
+    private void reorganizarIDs() {
+        try {
+            ConexionSQLite.reorganizarIDsProductos();
+            ConexionSQLiteDevolver.reorganizarIDsDeudores();
 
+            JOptionPane.showMessageDialog(this,
+                    "IDs reorganizados exitosamente\n" +
+                    "Productos y Deudores ahora tienen IDs secuenciales.",
+                    "Reorganización Completa",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            actualizarTablaSinReorganizar();
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al reorganizar IDs: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void actualizarTablaSinReorganizar() {
+        try {
+            buscarProducto();
+            List<Producto> productos = new ProductoDAO().listarTodos();
+            tablaProductos.setModel(new ProductoTableModel(productos));
+            tablaProductos.setDefaultRenderer(Object.class, new ProductoCellRenderer());
+
+            cargarTablaDeudores();
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al cargar datos: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // =============================
+    // 📌 MÉTODOS DE DEUDORES
+    // =============================
     private void registrarDeudor() {
         int fila = tablaDeudores.getSelectedRow();
 
         if (fila >= 0) {
-            // Editar deudor
             int idDeudor = (int) tablaDeudores.getValueAt(fila, 0);
 
             try {
                 Deudores d = new DeudoresDAO().buscarPorId(idDeudor);
                 new FormularioDeudor(this, d).setVisible(true);
-
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(this, "Error al cargar deudor: " + e.getMessage());
             }
 
         } else {
-            // Nuevo deudor
             new FormularioDeudor(this).setVisible(true);
         }
 
-        cargarTablaDeudores(); // refrescar
+        cargarTablaDeudores();
     }
 
     private void cargarTablaDeudores() {
@@ -151,17 +205,32 @@ public class VentanaPrincipal extends JFrame {
         }
     }
 
-    // ============================================================
-    // PRODUCTOS
-    // ============================================================
-
-    private void registrarVenta() {
-        int fila = tablaProductos.getSelectedRow();
+    private void eliminarDeudor() {
+        int fila = tablaDeudores.getSelectedRow();
         if (fila >= 0) {
-            int idProducto = (int) tablaProductos.getValueAt(fila, 0);
-            new FormularioVenta(this, idProducto).setVisible(true);
+            int id = (int) tablaDeudores.getValueAt(fila, 0);
+
+            try {
+                new DeudoresDAO().eliminar(id);
+                cargarTablaDeudores();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Error al eliminar: " + ex.getMessage());
+            }
+        }
+    }
+
+    // =============================
+    // PRODUCTOS
+    // =============================
+    private void registrarVenta() {
+        int[] filas = tablaProductos.getSelectedRows();
+        if (filas.length > 0) {
+            ArrayList<Integer> ids = new ArrayList<>();
+            for (int f : filas) ids.add((int) tablaProductos.getValueAt(f, 0));
+
+            new FormularioVenta(this, ids).setVisible(true);
         } else {
-            JOptionPane.showMessageDialog(this, "Seleccione un producto para registrar la venta");
+            JOptionPane.showMessageDialog(this, "Seleccione uno o más productos.");
         }
 
         generarNotificacionesAutomaticas();
@@ -169,9 +238,7 @@ public class VentanaPrincipal extends JFrame {
     }
 
     private void registrarDevolucion() {
-        // Abrir formulario de devolución (permite escribir nombre o seleccionar si hay duplicados)
         new FormularioDevolucion(this).setVisible(true);
-        // Refrescar tabla después de la posible devolución
         actualizarTabla();
     }
 
@@ -185,7 +252,7 @@ public class VentanaPrincipal extends JFrame {
             int id = (int) tablaProductos.getValueAt(fila, 0);
             new FormularioProducto(this, id).setVisible(true);
         } else {
-            JOptionPane.showMessageDialog(this, "Seleccione un producto");
+            JOptionPane.showMessageDialog(this, "Seleccione un producto.");
         }
     }
 
@@ -193,6 +260,7 @@ public class VentanaPrincipal extends JFrame {
         int fila = tablaProductos.getSelectedRow();
         if (fila >= 0) {
             int id = (int) tablaProductos.getValueAt(fila, 0);
+
             try {
                 new ProductoDAO().eliminarProducto(id);
                 actualizarTabla();
@@ -200,6 +268,14 @@ public class VentanaPrincipal extends JFrame {
                 JOptionPane.showMessageDialog(this, "Error al eliminar: " + ex.getMessage());
             }
         }
+    }
+
+    public void actualizarTabl1() {
+        actualizarTablaSinReorganizar();
+    }
+
+    public void actualizarTabl2() {
+        actualizarTablaSinReorganizar();
     }
 
     private void abrirReportes() {
@@ -221,29 +297,14 @@ public class VentanaPrincipal extends JFrame {
         }
     }
 
-    public void actualizarTabla2() {
-        try {
-            // Limpiar el buscador para mostrar todos los productos
-            txtBuscador.setText("");
-
-            // Recargar todos los productos desde la base de datos
-            List<Producto> productos = new ProductoDAO().listarTodos();
-            tablaProductos.setModel(new ProductoTableModel(productos));
-
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Error al actualizar los datos: " + ex.getMessage(),
-                    "Error de Base de Datos",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
     private void buscarProducto() {
         String texto = txtBuscador.getText().trim();
 
         try {
             ProductoDAO dao = new ProductoDAO();
-            List<Producto> productos = texto.isEmpty() ? dao.listarTodos() : dao.buscarPorNombre(texto);
+            List<Producto> productos = texto.isEmpty()
+                    ? dao.listarTodos()
+                    : dao.buscarPorNombre(texto);
 
             tablaProductos.setModel(new ProductoTableModel(productos));
 
@@ -252,9 +313,21 @@ public class VentanaPrincipal extends JFrame {
         }
     }
 
-    // ============================================================
-    // NOTIFICACIONES
-    // ============================================================    
+    private void buscarDeudor() {
+        String texto = txtBuscador.getText().trim();
+
+        try {
+            DeudoresDAO dao = new DeudoresDAO();
+            List<Deudores> deudores = texto.isEmpty()
+                    ? dao.listarTodos()
+                    : dao.buscarPorNombre(texto);
+
+            tablaDeudores.setModel(new DeudorTableModel(deudores));
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error de búsqueda: " + ex.getMessage());
+        }
+    }
 
     private void generarNotificacionesAutomaticas() {
         try {
