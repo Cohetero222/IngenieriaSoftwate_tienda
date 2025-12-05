@@ -31,6 +31,7 @@ import app.modelo.ProductoDAO;
  * @author omarf
  */
 public class FormularioProducto extends JDialog {
+
     // Componentes existentes
     private JTextField txtNombre, txtMarca;
     JTextField txtPrecio;
@@ -52,7 +53,7 @@ public class FormularioProducto extends JDialog {
 
     public FormularioProducto(JFrame parent, int idProducto) {
         super(parent, idProducto < 0 ? "Nuevo Producto" : "Editar Producto", true);
-        setSize(500, 500); // Aumentamos el tamaño para la nueva sección
+        setSize(500, 500); 
         setLocationRelativeTo(parent);
 
         this.esEdicion = idProducto >= 0;
@@ -109,7 +110,7 @@ public class FormularioProducto extends JDialog {
         txtPrecio = new JTextField(producto.getPrecio() > 0 ? String.valueOf(producto.getPrecio()) : "");
         panelDatos.add(txtPrecio);
 
-        panelDatos.add(new JLabel("Costo"));
+        panelDatos.add(new JLabel("Costo:"));
         txtCosto = new JTextField(producto.getCosto() > 0 ? String.valueOf(producto.getCosto()) : "");
         panelDatos.add(txtCosto);
 
@@ -124,7 +125,7 @@ public class FormularioProducto extends JDialog {
 
         panelPrincipal.add(panelDatos, BorderLayout.CENTER);
 
-        // Nuevo panel para registro de ventas (solo en modo edición)
+        // Panel para registro de ventas en modo edición
         if (esEdicion) {
             JPanel panelVentas = new JPanel(new GridLayout(3, 2, 5, 5));
             panelVentas.setBorder(BorderFactory.createTitledBorder("Registrar Venta"));
@@ -141,7 +142,7 @@ public class FormularioProducto extends JDialog {
             btnRegistrarVenta.addActionListener(e -> registrarVenta(lblTotal));
             panelVentas.add(btnRegistrarVenta);
 
-            // Actualizar total cuando cambia la cantidad
+            // Actualizar total
             spCantidadVenta.addChangeListener(e -> {
                 double precio = producto.getPrecio();
                 int cantidad = (int) spCantidadVenta.getValue();
@@ -168,19 +169,15 @@ public class FormularioProducto extends JDialog {
 
     private void guardarProducto(ActionEvent e) {
         try {
-            // 1. Obtener el valor del JSpinner.
             java.util.Date fecha = (java.util.Date) ((JSpinner) deFechaCaducidad.getSpinner()).getValue();
 
-            // 2. >>> IMPLEMENTACIÓN DEL CRITERIO DE ACEPTACIÓN 2: VALIDACIÓN OBLIGATORIA
-            // <<<
             if (fecha == null) {
                 JOptionPane.showMessageDialog(this,
                         "El campo 'Fecha Caducidad' es obligatorio.",
                         "Error de Validación", JOptionPane.ERROR_MESSAGE);
-                return; // Detiene la ejecución si el campo es nulo
+                return;
             }
 
-            // 3. Continuar con la lógica de negocio si la validación pasa
             producto.setNombre(txtNombre.getText());
             producto.setMarca(txtMarca.getText());
             producto.setCategoria((String) cbCategoria.getSelectedItem());
@@ -189,10 +186,8 @@ public class FormularioProducto extends JDialog {
             producto.setPrecio(Double.parseDouble(txtPrecio.getText()));
             producto.setCosto(Double.parseDouble(txtCosto.getText()));
 
-            // Convertir java.util.Date a LocalDate para el modelo
             producto.setFechaCaducidad(new java.sql.Date(fecha.getTime()).toLocalDate());
 
-            // ... (El resto del código del DAO continúa igual)
             ProductoDAO dao = new ProductoDAO();
             if (esEdicion) {
                 dao.actualizarProducto(producto);
@@ -216,7 +211,6 @@ public class FormularioProducto extends JDialog {
         int cantidad = (int) spCantidadVenta.getValue();
 
         try {
-            // Validar stock
             if (cantidad > producto.getCantidad()) {
                 JOptionPane.showMessageDialog(this,
                         "No hay suficiente stock. Disponible: " + producto.getCantidad(),
@@ -224,20 +218,16 @@ public class FormularioProducto extends JDialog {
                 return;
             }
 
-            // Registrar venta
             ProductoDAO dao = new ProductoDAO();
             if (dao.registrarVenta(producto.getId(), cantidad)) {
-                // Actualizar datos locales
                 producto.setCantidad(producto.getCantidad() - cantidad);
                 producto.setVentas(producto.getVentas() + cantidad);
                 spCantidad.setValue(producto.getCantidad());
 
                 JOptionPane.showMessageDialog(this,
-                        "Venta registrada exitosamente\n" +
-                                "Total: " + lblTotal.getText(),
+                        "Venta registrada exitosamente\nTotal: " + lblTotal.getText(),
                         "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
-                // Actualizar la tabla principal
                 ((VentanaPrincipal) getParent()).actualizarTabla();
             } else {
                 throw new SQLException("No se pudo registrar la venta");

@@ -141,6 +141,7 @@ public class FormularioDevolucion extends JDialog {
             boolean ok = new ProductoDAO().devolverProducto(seleccionado.getId(), cantidad);
             if (ok) {
                 JOptionPane.showMessageDialog(this, "Devolución registrada correctamente.");
+
                 if (parent instanceof VentanaPrincipal) {
                     ((VentanaPrincipal) parent).actualizarTabla();
                 }
@@ -149,11 +150,9 @@ public class FormularioDevolucion extends JDialog {
             } else {
                 JOptionPane.showMessageDialog(this, "No se pudo registrar la devolución.");
             }
-            } catch (SQLException ex) {
+        } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Error al procesar la devolución: " + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
-       
-

@@ -29,23 +29,30 @@ public class VentaDAO {
 
             // A. Registrar la venta en la tabla 'ventas'
             try (PreparedStatement pstmtVenta = conn.prepareStatement(INSERT_VENTA_SQL)) {
-                pstmtVenta.setInt(1, venta.getProducto().getId());
-                pstmtVenta.setInt(2, venta.getCantidad());
-                pstmtVenta.setDouble(3, venta.getPrecioUnitario());
-                pstmtVenta.setString(4, venta.getFecha().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                pstmtVenta.executeUpdate();
+                List<DetalleVenta> Detalles = venta.getVentaDetalles();
+                for(DetalleVenta V : Detalles){
+                    pstmtVenta.setInt(1, V.getProducto().getId());
+                    pstmtVenta.setInt(2, V.getCantidad());
+                    pstmtVenta.setDouble(3, V.getPrecioUnitario());
+                    pstmtVenta.setString(4, venta.getFecha().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                    pstmtVenta.executeUpdate();
+                }
+                
             }
 
             // B. Actualizar el stock en la tabla 'productos'
             try (PreparedStatement pstmtStock = conn.prepareStatement(UPDATE_STOCK_SQL)) {
-                pstmtStock.setInt(1, venta.getCantidad()); // Cantidad a restar del stock
-                pstmtStock.setInt(2, venta.getCantidad()); // Cantidad a sumar a las ventas
-                pstmtStock.setInt(3, venta.getProducto().getId()); // ID del producto
+                List<DetalleVenta> Detalles = venta.getVentaDetalles();
+                for(DetalleVenta V : Detalles){
+                    pstmtStock.setInt(1, V.getCantidad()); // Cantidad a restar del stock
+                    pstmtStock.setInt(2, V.getCantidad()); // Cantidad a sumar a las ventas
+                    pstmtStock.setInt(3, V.getProducto().getId()); // ID del producto
 
-                int filasAfectadas = pstmtStock.executeUpdate();
-                if (filasAfectadas == 0) {
-                    // Lanza una excepción si el producto no existe o algo salió mal
-                    throw new SQLException("Error al actualizar stock, producto no encontrado o stock insuficiente.");
+                    int filasAfectadas = pstmtStock.executeUpdate();
+                    if (filasAfectadas == 0) {
+                        // Lanza una excepción si el producto no existe o algo salió mal
+                        throw new SQLException("Error al actualizar stock, producto no encontrado o stock insuficiente.");
+                    }
                 }
             }
 
@@ -92,17 +99,18 @@ public class VentaDAO {
                     producto.setCategoria(rs.getString("categoria"));
 
                     Venta venta = new Venta();
+                    DetalleVenta DV = new DetalleVenta();
                     venta.setId(rs.getInt("id"));
-                    venta.setProducto(producto);
-                    venta.setCantidad(rs.getInt("cantidad"));
-                    venta.setPrecioUnitario(rs.getDouble("precio_unitario"));
+                    DV.setProducto(producto);
+                    DV.setCantidad(rs.getInt("cantidad"));
+                    DV.setPrecioUnitario(rs.getDouble("precio_unitario"));
 
                     // Leer la fecha como String y convertir a LocalDateTime
                     String fechaStr = rs.getString("fecha");
                     if (fechaStr != null && !fechaStr.isBlank()) {
                         venta.setFecha(LocalDateTime.parse(fechaStr, fmt));
                     }
-
+                    venta.AgregarDetalle(DV);
                     ventas.add(venta);
                 }
             }
