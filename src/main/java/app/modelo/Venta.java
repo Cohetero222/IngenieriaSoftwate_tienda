@@ -77,9 +77,4 @@ public class Venta {
     public int hashCode() {
         return Objects.hash(id, fecha, VentaDetalles);
     }
-
-    public Producto getProducto() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getProducto'");
-    }
 }

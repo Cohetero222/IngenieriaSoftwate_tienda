@@ -1,11 +1,19 @@
 package app.vista;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import app.modelo.Producto;
+import app.modelo.ProductoDAO;
+import app.modelo.ConexionSQLiteNotificaciones;
+import app.modelo.Deudores;
+import app.modelo.DeudoresDAO;
+import app.modelo.Notificaciones;
+import app.modelo.NotificacionesDAO;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.Component;
-import java.awt.Color;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
@@ -19,16 +27,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.table.DefaultTableCellRenderer;
-
-//import org.springframework.stereotype.Component;
 
 import app.modelo.ConexionSQLite;
 import app.modelo.ConexionSQLiteDevolver;
 import app.modelo.Deudores;
 import app.modelo.DeudoresDAO;
-import app.modelo.Notificaciones;
-import app.modelo.NotificacionesDAO;
 import app.modelo.Producto;
 import app.modelo.ProductoDAO;
 
@@ -57,7 +60,6 @@ public class VentanaPrincipal extends JFrame {
         panelBuscador.add(txtBuscador);
         add(panelBuscador, BorderLayout.NORTH);
 
-        // Listener de búsqueda
         txtBuscador.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent evt) {
@@ -97,10 +99,17 @@ public class VentanaPrincipal extends JFrame {
         btnRegistrarVenta = new JButton(" Registrar Venta");
         btnDeudores = new JButton(" Registrar/Editar Deudor");
         btnDevolucion = new JButton(" Devolución");
+        // Boton nuevo para refrescar la base de datos.
         btnRefresh = new JButton(" Refresh");
 
         btnAgregar.addActionListener(e -> abrirFormularioProducto());
         btnEditar.addActionListener(e -> editarProducto());
+        btnEliminar.addActionListener(e -> eliminarProducto());
+        btnReportes.addActionListener(e -> abrirReportes());
+        btnRegistrarVenta.addActionListener(e -> registrarVenta());
+        btnDevolucion.addActionListener(e -> registrarDevolucion());
+        // Parte para refrescar.
+        btnRefresh.addActionListener(e -> actualizarTabla());
 
         btnEliminar.addActionListener(e -> {
             int tab = tabs.getSelectedIndex();
@@ -123,6 +132,7 @@ public class VentanaPrincipal extends JFrame {
         panelBotones.add(btnRegistrarVenta);
         panelBotones.add(btnDevolucion);
         panelBotones.add(btnDeudores);
+        // Se agrega el boton refresh al panel.
         panelBotones.add(btnRefresh);
 
         add(panelBotones, BorderLayout.SOUTH);
@@ -216,6 +226,22 @@ public class VentanaPrincipal extends JFrame {
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this, "Error al eliminar: " + ex.getMessage());
             }
+        }
+    }
+
+    private void buscarDeudor() {
+        String texto = txtBuscador.getText().trim();
+
+        try {
+            DeudoresDAO dao = new DeudoresDAO();
+            List<Deudores> deudores = texto.isEmpty()
+                    ? dao.listarTodos()
+                    : dao.buscarPorNombre(texto);
+
+            tablaDeudores.setModel(new DeudorTableModel(deudores));
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error de búsqueda: " + ex.getMessage());
         }
     }
 
@@ -313,21 +339,9 @@ public class VentanaPrincipal extends JFrame {
         }
     }
 
-    private void buscarDeudor() {
-        String texto = txtBuscador.getText().trim();
-
-        try {
-            DeudoresDAO dao = new DeudoresDAO();
-            List<Deudores> deudores = texto.isEmpty()
-                    ? dao.listarTodos()
-                    : dao.buscarPorNombre(texto);
-
-            tablaDeudores.setModel(new DeudorTableModel(deudores));
-
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error de búsqueda: " + ex.getMessage());
-        }
-    }
+    // ============================================================
+    // NOTIFICACIONES
+    // ============================================================    
 
     private void generarNotificacionesAutomaticas() {
         try {
