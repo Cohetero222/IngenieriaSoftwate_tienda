@@ -37,8 +37,6 @@ public class ConexionSQLiteDevolver {
 
         try (Connection conn = conectar();
              Statement stmt = conn.createStatement()) {
-
-            // Crear tabla si no existe
             stmt.execute(sqlDeudores);
 
             // Agregar columna pagado si no existe

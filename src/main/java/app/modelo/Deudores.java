@@ -101,14 +101,13 @@ public void setPagado(boolean pagado) {
     public void setCosto(double costo) {
         this.costo = costo;
     }
+//Metodo para mostrar "Si"/"No" en la tabla
+public String getPagadoAsString() {
+    return pagado ? "Si" : "No";
+}
 
-     //Metodo para mostrar "Si"/"No" en la tabla
-    public String getPagadoAsString() {
-        return pagado ? "Si" : "No";
-    }
-    
-    //Metodo para convertir de String a boolean
-    public static boolean parsePagado(String texto) {
-        return "Si".equalsIgnoreCase(texto) || "Sí".equalsIgnoreCase(texto) || "true".equalsIgnoreCase(texto);
-    }
+//Metodo para convertir de String a boolean
+public static boolean parsePagado(String texto) {
+    return "Si".equalsIgnoreCase(texto) || "Sí".equalsIgnoreCase(texto) || "true".equalsIgnoreCase(texto);
+}
 }

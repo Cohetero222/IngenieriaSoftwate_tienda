@@ -5,6 +5,8 @@ src/main/java/app/vista
  */
 package app.vista;
 
+import app.modelo.Producto;
+import javax.swing.table.AbstractTableModel;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 

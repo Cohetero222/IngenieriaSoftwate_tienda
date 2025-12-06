@@ -3,15 +3,8 @@ package app.vista;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import javax.swing.*;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import app.modelo.Deudores;
 import app.modelo.DeudoresDAO;
@@ -67,11 +60,15 @@ public class FormularioDeudor extends JDialog {
         txtCosto = new JTextField(String.valueOf(deudor.getCosto()));
         add(txtCosto);
 
-        // Nuevo apartado pagado 
-        add(new JLabel("Pagado:"));
-        chkPagado = new JCheckBox("¿Ya pagó?");
-        chkPagado.setSelected(deudor.isPagado());
-        add(chkPagado);
+// Nuevo apartado pagado 
+add(new JLabel("Pagado:"));
+chkPagado = new JCheckBox("¿Ya pagó?");
+chkPagado.setSelected(deudor.isPagado());
+add(chkPagado);
+
+// Puedes usar los nombres que tú prefieres, mantengo los tuyos:
+btnGuardar = new JButton(" Guardar");
+btnCancelar = new JButton(" Cancelar");
 
        // Panel para botones alineados a la derecha
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
